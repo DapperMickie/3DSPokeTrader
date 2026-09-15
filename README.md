@@ -2,7 +2,7 @@
 
 A homebrew 3DS app and Linux bridge for exchanging boxed Pokemon from a FireRed/LeafGreen save with an unmodified Switch running FireRed/LeafGreen.
 
-**Version 0.1 is a hardware-test build.** Save handling, recovery, and the bridge API have automated tests. No physical 3DS-to-Switch trade has been performed with this app yet. The live transport reuses the pinned [frlg-ldn-trade](https://github.com/tornadus/frlg-ldn-trade) project.
+**Version 0.2.2 is a hardware-test build.** Save handling, recovery, and the bridge API have automated tests. No physical 3DS-to-Switch trade has been performed with this app yet. The live transport reuses the pinned [frlg-ldn-trade](https://github.com/tornadus/frlg-ldn-trade) project.
 
 ## What it does
 
@@ -26,7 +26,7 @@ The 3DS is the interface and save-file client. The PC parses the save and talks 
 
 The upstream README lists ALFA AWUS036ACHM and Realtek RTL8821CE as tested adapters. **Use a separate network connection for the 3DS-to-PC link.** The adapter used for Switch LDN must be unmanaged by NetworkManager. Keep the PC reachable through Ethernet or a second Wi-Fi adapter. Do not stop NetworkManager globally if it provides the connection your 3DS is using.
 
-Windows can run inspection, demo mode, and tests. Live trading needs Linux with direct access to supported Wi-Fi hardware. An ordinary WSL network connection is insufficient for LDN.
+Windows can run inspection, demo mode, and tests. Live trading needs Linux with direct access to supported Wi-Fi hardware. An ordinary WSL network connection is insufficient for LDN. We have validated USB passthrough, the RTL8192EU driver, passive reception and LDN monitor setup in WSL 2 using a custom kernel. End-to-end Switch trading through WSL is still untested. See [the WSL setup notes](docs/wsl-setup.md).
 
 ## Install the bridge
 
@@ -64,7 +64,7 @@ sudo nmcli device set wlan1 managed yes
 
 ## Install the 3DS app
 
-The prebuilt SD-card archive is `dist/PokeTrader-3ds-v0.1.0.zip`. Extract its `3ds` folder to the SD-card root, then add your generated `bridge.cfg` as described above. The separate source archive includes the Linux bridge and setup script.
+The prebuilt SD-card archive is `dist/PokeTrader-3ds-v0.2.2.zip`. Extract its `3ds` folder to the SD-card root, then add your generated `bridge.cfg` as described above. The separate source archive includes the Linux bridge and setup script.
 
 Build with [devkitPro's 3DS toolchain](https://devkitpro.org/wiki/Getting_Started):
 
@@ -72,7 +72,7 @@ Build with [devkitPro's 3DS toolchain](https://devkitpro.org/wiki/Getting_Starte
 make -C 3ds
 ```
 
-Copy `3ds/PokeTrader.3dsx` and `3ds/PokeTrader.smdh` into `sdmc:/3ds/PokeTrader/`. Launch PokeTrader from the Homebrew Launcher. This version is a `.3dsx` application, not a CIA installer.
+Copy `3ds/PokeTrader.3dsx` and `3ds/PokeTrader.smdh` into `sdmc:/3ds/PokeTrader/` to launch it from Homebrew Launcher, or copy `3ds/PokeTrader.cia` to the SD card and install it with FBI to place PokeTrader on the HOME Menu.
 
 The repository also includes `Dockerfile.build` and a GitHub Actions build workflow. Both pin the devkitPro image used for compilation.
 
@@ -162,4 +162,35 @@ Demo mode is labelled **DEMO - NO SWITCH TRADE** on the client. It still writes 
 
 ## Sources and license
 
-This project is AGPL-3.0-or-later. No ROMs, Switch keys, sprites, or personal saves are bundled. Protocol and save-format references, pinned revisions, and the upstream adapter fixes are recorded in [docs/implementation.md](docs/implementation.md).
+This project is AGPL-3.0-or-later. No ROMs, Switch keys, or personal saves are bundled. Sprite images remain copyright The Pokemon Company; the PokeAPI distribution notice and VT323 font license are included in `3ds/assets/`. Protocol and save-format references, pinned revisions, and the upstream adapter fixes are recorded in [docs/implementation.md](docs/implementation.md).
+
+## Graphical UI and previews
+
+Version 0.2 uses a dual-screen graphical interface with embedded FRLG sprites and VT323 pixel text. Update the PC bridge together with the 3DS app; the box metadata endpoint requires version 0.2.
+
+- Home: choose Trade or Settings. Pending exchanges appear as Resume trade.
+- Settings: edit PC address, port and pairing token with the system keyboard, then choose Test & save. B returns home; untested edits are discarded.
+- Save browser: D-pad selects a file or folder, A opens it, B goes up. Touch a row to select, then touch Open selection.
+- Boxes: D-pad or touch selects a slot in the 6 by 5 grid. L/R changes boxes. A or Select Pokemon continues to trade preparation.
+- Trade: start and Switch-save confirmation remain separate actions. B returns home with the recovery record retained. START exits the app.
+- Messages: up/down scrolls long text; A/B continues.
+
+[View the six-screen preview](docs/screenshots/overview.png). These are offscreen captures from the actual C renderer using example data, not captures from console hardware. Both screen sizes match the device: 400 by 240 and 320 by 240. Physical readability, touch accuracy and performance still need device testing.
+
+To reproduce captures, compile `tests/ui_preview.c` with `3ds/source/ui.c` and `-I3ds/include`, run it from the repository root, then run `python scripts/render-ui-previews.py` with Pillow installed. `scripts/build-ui-assets.py` rebuilds the embedded assets from pinned upstream revisions. Assets are already included for normal builds.
+
+The classic theme uses blue striped panels, cream dialogue frames, a green PC-box wallpaper and a red selection cursor. The typography is VT323, an openly licensed pixel font; it is not an extracted Pokemon game font.
+
+## Connect from the 3DS settings
+
+1. Connect the 3DS to your home Wi-Fi using **System Settings > Internet Settings**. Keep the Linux bridge PC on that same LAN, through Ethernet or a separate Wi-Fi adapter from the one used for Switch trading.
+2. On the PC, run the installation and `pair` commands above. The generated `bridge.cfg` contains the PC IPv4 address, port, and pairing token, one per line.
+3. Either copy `bridge.cfg` to `sdmc:/3ds/PokeTrader/` before launching, or open **Home > Settings** on the 3DS and enter those three values. The default port is **8765**. The token is 32 hexadecimal characters. This is the bridge token, not your Wi-Fi password or Switch keys.
+4. Start the PC bridge with the `serve` command above. On the 3DS choose **Test & save**. A successful authenticated response saves the configuration to the SD card and reports **LIVE** or **DEMO**. Failed tests do not activate edited settings.
+5. Return Home and choose **Trade**. A successful connection test checks the PC API only; a live Switch trade also needs the dedicated adapter, keys and upstream setup described above.
+
+If the test fails, check the PC address and token, whether the bridge is running, and whether the PC firewall allows TCP port 8765 from your LAN. Guest-network client isolation can prevent the devices from reaching each other. No router port forwarding is needed.
+
+During a pending trade, connection fields are locked to keep recovery on the original bridge. Test and setup help remain available. Home and settings also open without a config file. Config edits, the system keyboard, and Wi-Fi behavior still need physical 3DS validation.
+
+[Home and settings screenshots](docs/screenshots/settings-overview.png) use sample data from the same C renderer as the app. The connected screenshot illustrates the success state; it is not evidence of a hardware connection.

@@ -22,4 +22,5 @@ jobs:
           name: PokeTrader-3ds
           path: |
             3ds/PokeTrader.3dsx
+            3ds/PokeTrader.cia
             3ds/PokeTrader.smdh

@@ -61,8 +61,17 @@ int request(const Config *cfg, const char *method, const char *path,
         if(errno!=EINPROGRESS) goto network_error;
         struct pollfd wait={fd,POLLOUT,0};
         if(poll(&wait,1,10000)<=0) goto network_error;
+#ifdef __3DS__
+        /* On 3DS, SOC's SO_ERROR query can fail after poll has already
+           completed a successful handshake. Closing at that point sends a
+           reset before the HTTP request. poll reports connection failures in
+           revents, and send_all remains the final connection check. */
+        if(!(wait.revents&POLLOUT) || (wait.revents&(POLLERR|POLLHUP|POLLNVAL)))
+            goto network_error;
+#else
         int code=0; socklen_t len=sizeof(code);
         if(getsockopt(fd,SOL_SOCKET,SO_ERROR,&code,&len)<0 || code) goto network_error;
+#endif
     }
     /* libctru has no SO_RCVTIMEO/SO_SNDTIMEO. Keep the socket nonblocking
        and bound every wait with poll on both the 3DS and native builds. */

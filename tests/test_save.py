@@ -6,6 +6,29 @@ from .fixtures import save, pokemon
 
 
 class SaveTests(unittest.TestCase):
+    def test_ui_metadata_is_read_only_and_marks_eligibility(self):
+        original = save(offered=pokemon(pid=0, ot=0))
+        parsed = Save(original)
+        rows = [line.split("\t") for line in parsed.box_details(0).splitlines()]
+        self.assertEqual(len(rows), 30)
+        self.assertTrue(all(len(row) == 14 for row in rows))
+        self.assertEqual(rows[0][:9], ["0", "25", "1", "1", "10", "1", "ELECTRIC", "ELECTRIC", "Pikachu"])
+        self.assertEqual(rows[0][12], "Hardy")
+        self.assertEqual(rows[1][5], "0")
+        self.assertEqual(parsed.pokemon(0).pk3, pokemon(pid=0, ot=0))
+        for offered in (pokemon(egg=True), pokemon(item=121)):
+            row = Save(save(offered=offered)).box_details(0).splitlines()[0].split("\t")
+            self.assertEqual(row[3], "0")
+
+    def test_growth_curve_level_100_values(self):
+        from poketrader.save import experience_at
+        expected = {"MEDIUM_FAST":1000000, "FAST":800000, "SLOW":1250000,
+                    "MEDIUM_SLOW":1059860, "ERRATIC":600000, "FLUCTUATING":1640000}
+        for curve, maximum in expected.items():
+            self.assertEqual(experience_at(curve, 100), maximum)
+            levels = [experience_at(curve, n) for n in range(1, 101)]
+            self.assertEqual(levels, sorted(set(levels)))
+
     def test_all_shuffles_including_zero_xor_key(self):
         for pid in range(24):
             for ot in (pid, 0xABCDEF12):

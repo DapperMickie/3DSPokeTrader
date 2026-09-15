@@ -85,6 +85,8 @@ class Handler(BaseHTTPRequestHandler):
                                         save.trainer_id & 65535, save.warning, service.backend.label))
             elif method == "GET" and len(path) == 5 and path[:2] == ["v1", "saves"] and path[3] == "boxes":
                 self.respond(200, service.save(path[2]).box_lines(int(path[4])).encode())
+            elif method == "GET" and len(path) == 6 and path[:2] == ["v1", "saves"] and path[3] == "boxes" and path[5] == "details":
+                self.respond(200, service.save(path[2]).box_details(int(path[4])).encode())
             elif len(path) >= 3 and path[:2] == ["v1", "trades"]:
                 trade_id = path[2]
                 if method == "PUT" and len(path) == 3:

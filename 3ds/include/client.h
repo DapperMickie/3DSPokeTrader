@@ -9,6 +9,9 @@
 #define PENDING_PATH APP_DIR "/pending.txt"
 
 typedef struct { char host[64]; int port; char token[33]; } Config;
+int config_valid(const Config *);
+int config_load(const char *path, Config *);
+int config_save(const char *path, const Config *);
 typedef struct { unsigned char *data; size_t size; int status; } Response;
 typedef struct {
     char id[33], save_id[33], original_hash[65];

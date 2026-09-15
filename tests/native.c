@@ -75,7 +75,26 @@ static void test_http(int truncated) {
         assert(field(&response,2,value,sizeof(value))==0); assert(!strcmp(value,"EEVEE")); }
     response_free(&response); close(listener); int code; waitpid(child,&code,0); assert(code==0);
 }
+static void test_config(void) {
+    Config c={"192.168.1.50",8765,"0123456789abcdef0123456789abcdef"},loaded;
+    assert(config_valid(&c));
+    char dir[]="/tmp/poketrader-config-XXXXXX"; assert(mkdtemp(dir));
+    char path[256]; snprintf(path,sizeof(path),"%s/bridge.cfg",dir);
+    assert(config_save(path,&c)==0); assert(config_load(path,&loaded)==0);
+    assert(!strcmp(c.host,loaded.host) && c.port==loaded.port && !strcmp(c.token,loaded.token));
+    c.port=9000; assert(config_save(path,&c)==0); assert(config_load(path,&loaded)==0 && loaded.port==9000);
+    char sidecar[272];
+    snprintf(sidecar,sizeof(sidecar),"%s.new",path); assert(access(sidecar,F_OK)<0);
+    snprintf(sidecar,sizeof(sidecar),"%s.bak",path); assert(access(sidecar,F_OK)<0);
+    c.port=65536; assert(!config_valid(&c)); assert(config_save(path,&c)<0);
+    assert(config_load(path,&loaded)==0 && loaded.port==9000);
+    c.port=8765; strcpy(c.host,"999.168.1.50"); assert(!config_valid(&c));
+    strcpy(c.host,"192.168.1.50"); c.token[0]='z'; assert(!config_valid(&c));
+    const char *bad="192.168.1.50\n8765junk\n0123456789abcdef0123456789abcdef\n";
+    assert(durable_file(path,bad,strlen(bad))==0); assert(config_load(path,&loaded)<0);
+    unlink(path); rmdir(dir);
+}
 int main(void) {
-    test_hash(); test_files(); test_http(0); test_http(1);
+    test_config(); test_hash(); test_files(); test_http(0); test_http(1);
     puts("Native SHA-256, journal, replacement recovery and HTTP checks passed."); return 0;
 }

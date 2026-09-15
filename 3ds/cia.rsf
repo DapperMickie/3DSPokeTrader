@@ -1,0 +1,41 @@
+BasicInfo:
+  Title: PokeTrader
+  ProductCode: CTR-PKTR
+  Logo: Nintendo
+
+TitleInfo:
+  Category: Application
+  UniqueId: 0x504B54
+  Version: 0
+  Platform: 3DS
+
+Option:
+  UseOnSD: true
+  FreeProductCode: true
+  EnableCrypt: false
+  EnableCompress: true
+
+AccessControlInfo:
+  CoreVersion: 2
+  DescVersion: 2
+
+FileSystemAccess:
+  - CategoryFileSystemTool
+
+ProcessSettings:
+  MemoryType: Application
+  SystemMode: 64MB
+  IdealProcessor: 0
+  AffinityMask: 1
+  Priority: 16
+  MaxCpu: 0x9E
+  CanWriteSharedPage: true
+  CanUseNonAlphabetAndNumber: true
+  PermitMainFunctionArgument: true
+  CanShareDeviceMemory: true
+  SpecialMemoryArrange: true
+
+SystemControlInfo:
+  SaveDataSize: 0KB
+  RemasterVersion: 0
+  StackSize: 0x40000

@@ -10,8 +10,8 @@ LDFLAGS := -specs=3dsx.specs $(ARCH) -Wl,-Map,$(TARGET).map -Wl,--gc-sections
 LIBS := -L$(CTRULIB)/lib -lctru -lm
 OBJECTS := $(patsubst source/%.c,build/%.o,$(wildcard source/*.c))
 
-.PHONY: all
-all: $(TARGET).3dsx
+.PHONY: all cia clean
+all: $(TARGET).3dsx $(TARGET).cia
 
 build:
 	mkdir -p build
@@ -25,7 +25,18 @@ $(TARGET).elf: $(OBJECTS)
 $(TARGET).smdh:
 	smdhtool --create "PokeTrader" "FRLG save exchange" "PokeTrader contributors" $(CTRULIB)/default_icon.png $@
 
-$(TARGET).3dsx: $(TARGET).elf $(TARGET).smdh
-	3dsxtool $< $@ --smdh=$(TARGET).smdh
+$(TARGET).3dsx: $(TARGET).elf $(TARGET).smdh $(wildcard romfs/ui/*)
+	3dsxtool $< $@ --smdh=$(TARGET).smdh --romfs=romfs
+
+# Package the same ELF as an installable HOME Menu application.  The 3DSX
+# and CIA formats are two different containers, so the CIA is built directly
+# from the ELF rather than by renaming/converting the 3DSX.
+$(TARGET).cia: $(TARGET).elf $(TARGET).smdh cia.rsf $(wildcard romfs/ui/*)
+	makerom -f cia -o $@ -target t -exefslogo -elf $(TARGET).elf \
+		-rsf cia.rsf -icon $(TARGET).smdh \
+		-romfs romfs
+
+clean:
+	rm -rf build $(TARGET).elf $(TARGET).map $(TARGET).3dsx $(TARGET).smdh $(TARGET).cia
 
 -include build/*.d

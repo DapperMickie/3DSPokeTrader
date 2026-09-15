@@ -6,6 +6,7 @@ from pathlib import Path
 import subprocess
 import sys
 import signal
+import shutil
 import threading
 
 UPSTREAM_REVISION = "13809c21b6e992097f98453b7cbc9e2bc30bbf7c"
@@ -42,6 +43,8 @@ class LiveBackend:
             raise ValueError("Wi-Fi device must be a name such as phy1.")
         if not Path("/sys/class/ieee80211", self.phy).exists():
             raise ValueError("The configured Wi-Fi adapter is not present. Check iw dev.")
+        if shutil.which("nmcli") is None:
+            raise ValueError("nmcli is missing. On WSL, install the dedicated-adapter shim from scripts/wsl-nmcli-shim.sh.")
         check = subprocess.run([self.python, "-c", "import ldn, trio, zstandard, Crypto"],
                                capture_output=True, text=True, timeout=20)
         if check.returncode:

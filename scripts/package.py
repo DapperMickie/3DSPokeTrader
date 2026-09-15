@@ -12,11 +12,11 @@ parser.add_argument("--binaries", type=Path, default=ROOT/"3ds")
 args = parser.parse_args()
 out = ROOT/"dist"
 out.mkdir(exist_ok=True)
-binary_files = [args.binaries/"PokeTrader.3dsx", args.binaries/"PokeTrader.smdh"]
+binary_files = [args.binaries/"PokeTrader.3dsx", args.binaries/"PokeTrader.smdh", args.binaries/"PokeTrader.cia"]
 assert binary_files[0].read_bytes()[:4] == b"3DSX", "Not a valid 3DSX header"
 assert binary_files[1].read_bytes()[:4] == b"SMDH", "Not a valid SMDH header"
 manifest = {
-    "version": "0.1.0",
+    "version": "0.2.2",
     "built_at_utc": datetime.now(timezone.utc).isoformat(),
     "hardware_trade_tested": False,
     "toolchain": "devkitARM GCC 16.1.0",
@@ -26,17 +26,21 @@ manifest = {
 }
 manifest_path = out/"build-info.json"
 manifest_path.write_text(json.dumps(manifest, indent=2)+"\n", encoding="utf-8")
-sd_zip = out/"PokeTrader-3ds-v0.1.0.zip"
+sd_zip = out/"PokeTrader-3ds-v0.2.2.zip"
 with zipfile.ZipFile(sd_zip,"w",zipfile.ZIP_DEFLATED) as archive:
-    for path in binary_files: archive.write(path,"3ds/PokeTrader/"+path.name)
+    for path in binary_files:
+        archive.write(path, path.name if path.suffix == ".cia" else "3ds/PokeTrader/"+path.name)
     archive.write(ROOT/"LICENSE","LICENSE")
+    for license in (ROOT/"3ds/assets").glob("*.txt"):
+        archive.write(license,"licenses/"+license.name)
     archive.write(manifest_path,"build-info.json")
     archive.writestr("INSTALL.txt",
-        "PokeTrader 0.1 - hardware-test build\n\n"
+        "PokeTrader 0.2.2 - hardware-test build\n\n"
         "Copy the 3ds folder to the root of your 3DS SD card.\n"
         "Generate bridge.cfg on the Linux PC with the pair command.\n"
         "Copy it to /3ds/PokeTrader/bridge.cfg on the SD card.\n"
         "Launch PokeTrader from Homebrew Launcher.\n\n"
+        "Alternatively, install PokeTrader.cia with FBI to place it on the HOME Menu.\n\n"
         "A Linux bridge, dedicated compatible Wi-Fi adapter, and your own\n"
         "Switch keys are required for live trading. See the project's README.\n"
         "No physical console trade has been tested with this build.\n"
@@ -47,9 +51,9 @@ for directory in ("poketrader","3ds","scripts","tests","docs",".github"):
     for path in (ROOT/directory).rglob("*"):
         if not path.is_file() or "__pycache__" in path.parts or "build" in path.parts:
             continue
-        if path.suffix in (".py",".c",".h",".json",".md",".sh",".yml") or path.name=="Makefile":
+        if path.suffix in (".py",".c",".h",".json",".md",".sh",".yml",".bin",".txt",".png",".rsf") or path.name=="Makefile":
             source_files.append(path)
-source_zip = out/"PokeTrader-source-v0.1.0.zip"
+source_zip = out/"PokeTrader-source-v0.2.2.zip"
 with zipfile.ZipFile(source_zip,"w",zipfile.ZIP_DEFLATED) as archive:
     for path in sorted(set(source_files)): archive.write(path,path.relative_to(ROOT))
 for path in (sd_zip,source_zip):

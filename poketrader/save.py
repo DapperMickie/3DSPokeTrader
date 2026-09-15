@@ -27,6 +27,11 @@ ORDERS = ("GAEM", "GAME", "GEAM", "GEMA", "GMAE", "GMEA",
           "MGAE", "MGEA", "MAGE", "MAEG", "MEGA", "MEAG")
 SPECIES = {int(k): v for k, v in json.loads(
     files("poketrader").joinpath("species.json").read_text(encoding="utf-8")).items()}
+SPECIES_INFO = {int(k): v for k, v in json.loads(
+    files("poketrader").joinpath("species-info.json").read_text(encoding="utf-8")).items()}
+NATURES = ("Hardy", "Lonely", "Brave", "Adamant", "Naughty", "Bold", "Docile", "Relaxed",
+           "Impish", "Lax", "Timid", "Hasty", "Serious", "Jolly", "Naive", "Modest", "Mild",
+           "Quiet", "Bashful", "Rash", "Calm", "Gentle", "Sassy", "Careful", "Quirky")
 CHARS = {0: " ", 0xAB: "!", 0xAC: "?", 0xAD: ".", 0xAE: "-",
          0xB4: "'", 0xB8: ",", 0xBA: "/"}
 CHARS.update({0xA1 + n: c for n, c in enumerate("0123456789")})
@@ -54,6 +59,26 @@ def section_checksum(data: bytes) -> int:
 
 def pokemon_checksum(canonical: bytes) -> int:
     return sum(struct.unpack("<24H", canonical[32:80])) & 0xFFFF
+
+
+def experience_at(growth: str, level: int) -> int:
+    if level <= 1:
+        return 0
+    cube = level**3
+    if growth == "MEDIUM_FAST": return cube
+    if growth == "FAST": return 4*cube//5
+    if growth == "SLOW": return 5*cube//4
+    if growth == "MEDIUM_SLOW": return 6*cube//5 - 15*level**2 + 100*level - 140
+    if growth == "ERRATIC":
+        if level <= 50: return (100-level)*cube//50
+        if level <= 68: return (150-level)*cube//100
+        if level <= 98: return ((1911-10*level)//3)*cube//500
+        return (160-level)*cube//100
+    if growth == "FLUCTUATING":
+        if level <= 15: return ((level+1)//3+24)*cube//50
+        if level <= 36: return (level+14)*cube//50
+        return (level//2+32)*cube//50
+    raise SaveError("Unknown experience growth rate.")
 
 
 def decode_box(encrypted: bytes) -> bytes:
@@ -225,6 +250,37 @@ class Save:
             except SaveError:
                 lines.append(f"{index}\t(invalid Pokemon)")
         return "\n".join(lines)+"\n"
+
+    def box_details(self, box: int) -> str:
+        """Read-only presentation metadata. Never alters the source record."""
+        if not 0 <= box < 14:
+            raise SaveError("Box number is out of range.")
+        rows = []
+        for index in range(box*30, box*30+30):
+            raw = self.storage[4+index*80:4+(index+1)*80]
+            # index, dex, shiny, eligible, level, kind, types, species, nickname,
+            # original trainer, public TID, nature, and an eligibility explanation.
+            row = [index, 0, 0, 0, 0, 0, "", "", "", "", "", 0, "", "Empty slot"]
+            if raw != bytes(80):
+                try:
+                    mon = self.pokemon(index)
+                    growth, type_a, type_b = SPECIES_INFO[mon.species]
+                    exp = u32(mon.pk3, 36)
+                    level = max(n for n in range(1, 101) if experience_at(growth, n) <= exp)
+                    pid, ot = u32(mon.pk3, 0), u32(mon.pk3, 4)
+                    shiny = ((pid >> 16) ^ (pid & 65535) ^ (ot >> 16) ^ (ot & 65535)) < 8
+                    eligible, reason = 1, "Ready to trade"
+                    try:
+                        mon.check_tradeable()
+                    except SaveError as exc:
+                        eligible, reason = 0, str(exc)
+                    row = [index, mon.dex, int(shiny), eligible, level, 2 if mon.egg else 1,
+                           type_a, type_b, mon.name.title(), mon.nickname, text(mon.pk3[20:27]),
+                           ot & 65535, NATURES[pid % 25], reason]
+                except SaveError:
+                    row[5], row[13] = 3, "Invalid Pokemon record"
+            rows.append("\t".join(str(value).replace("\t", " ").replace("\n", " ") for value in row))
+        return "\n".join(rows)+"\n"
 
     def replace(self, index: int, expected: bytes, received: bytes) -> bytes:
         if self.pokemon(index).pk3 != expected:

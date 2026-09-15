@@ -1,0 +1,1932 @@
+{
+  "1": [
+    "MEDIUM_SLOW",
+    "GRASS",
+    "POISON"
+  ],
+  "2": [
+    "MEDIUM_SLOW",
+    "GRASS",
+    "POISON"
+  ],
+  "3": [
+    "MEDIUM_SLOW",
+    "GRASS",
+    "POISON"
+  ],
+  "4": [
+    "MEDIUM_SLOW",
+    "FIRE",
+    "FIRE"
+  ],
+  "5": [
+    "MEDIUM_SLOW",
+    "FIRE",
+    "FIRE"
+  ],
+  "6": [
+    "MEDIUM_SLOW",
+    "FIRE",
+    "FLYING"
+  ],
+  "7": [
+    "MEDIUM_SLOW",
+    "WATER",
+    "WATER"
+  ],
+  "8": [
+    "MEDIUM_SLOW",
+    "WATER",
+    "WATER"
+  ],
+  "9": [
+    "MEDIUM_SLOW",
+    "WATER",
+    "WATER"
+  ],
+  "10": [
+    "MEDIUM_FAST",
+    "BUG",
+    "BUG"
+  ],
+  "11": [
+    "MEDIUM_FAST",
+    "BUG",
+    "BUG"
+  ],
+  "12": [
+    "MEDIUM_FAST",
+    "BUG",
+    "FLYING"
+  ],
+  "13": [
+    "MEDIUM_FAST",
+    "BUG",
+    "POISON"
+  ],
+  "14": [
+    "MEDIUM_FAST",
+    "BUG",
+    "POISON"
+  ],
+  "15": [
+    "MEDIUM_FAST",
+    "BUG",
+    "POISON"
+  ],
+  "16": [
+    "MEDIUM_SLOW",
+    "NORMAL",
+    "FLYING"
+  ],
+  "17": [
+    "MEDIUM_SLOW",
+    "NORMAL",
+    "FLYING"
+  ],
+  "18": [
+    "MEDIUM_SLOW",
+    "NORMAL",
+    "FLYING"
+  ],
+  "19": [
+    "MEDIUM_FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "20": [
+    "MEDIUM_FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "21": [
+    "MEDIUM_FAST",
+    "NORMAL",
+    "FLYING"
+  ],
+  "22": [
+    "MEDIUM_FAST",
+    "NORMAL",
+    "FLYING"
+  ],
+  "23": [
+    "MEDIUM_FAST",
+    "POISON",
+    "POISON"
+  ],
+  "24": [
+    "MEDIUM_FAST",
+    "POISON",
+    "POISON"
+  ],
+  "25": [
+    "MEDIUM_FAST",
+    "ELECTRIC",
+    "ELECTRIC"
+  ],
+  "26": [
+    "MEDIUM_FAST",
+    "ELECTRIC",
+    "ELECTRIC"
+  ],
+  "27": [
+    "MEDIUM_FAST",
+    "GROUND",
+    "GROUND"
+  ],
+  "28": [
+    "MEDIUM_FAST",
+    "GROUND",
+    "GROUND"
+  ],
+  "29": [
+    "MEDIUM_SLOW",
+    "POISON",
+    "POISON"
+  ],
+  "30": [
+    "MEDIUM_SLOW",
+    "POISON",
+    "POISON"
+  ],
+  "31": [
+    "MEDIUM_SLOW",
+    "POISON",
+    "GROUND"
+  ],
+  "32": [
+    "MEDIUM_SLOW",
+    "POISON",
+    "POISON"
+  ],
+  "33": [
+    "MEDIUM_SLOW",
+    "POISON",
+    "POISON"
+  ],
+  "34": [
+    "MEDIUM_SLOW",
+    "POISON",
+    "GROUND"
+  ],
+  "35": [
+    "FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "36": [
+    "FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "37": [
+    "MEDIUM_FAST",
+    "FIRE",
+    "FIRE"
+  ],
+  "38": [
+    "MEDIUM_FAST",
+    "FIRE",
+    "FIRE"
+  ],
+  "39": [
+    "FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "40": [
+    "FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "41": [
+    "MEDIUM_FAST",
+    "POISON",
+    "FLYING"
+  ],
+  "42": [
+    "MEDIUM_FAST",
+    "POISON",
+    "FLYING"
+  ],
+  "43": [
+    "MEDIUM_SLOW",
+    "GRASS",
+    "POISON"
+  ],
+  "44": [
+    "MEDIUM_SLOW",
+    "GRASS",
+    "POISON"
+  ],
+  "45": [
+    "MEDIUM_SLOW",
+    "GRASS",
+    "POISON"
+  ],
+  "46": [
+    "MEDIUM_FAST",
+    "BUG",
+    "GRASS"
+  ],
+  "47": [
+    "MEDIUM_FAST",
+    "BUG",
+    "GRASS"
+  ],
+  "48": [
+    "MEDIUM_FAST",
+    "BUG",
+    "POISON"
+  ],
+  "49": [
+    "MEDIUM_FAST",
+    "BUG",
+    "POISON"
+  ],
+  "50": [
+    "MEDIUM_FAST",
+    "GROUND",
+    "GROUND"
+  ],
+  "51": [
+    "MEDIUM_FAST",
+    "GROUND",
+    "GROUND"
+  ],
+  "52": [
+    "MEDIUM_FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "53": [
+    "MEDIUM_FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "54": [
+    "MEDIUM_FAST",
+    "WATER",
+    "WATER"
+  ],
+  "55": [
+    "MEDIUM_FAST",
+    "WATER",
+    "WATER"
+  ],
+  "56": [
+    "MEDIUM_FAST",
+    "FIGHTING",
+    "FIGHTING"
+  ],
+  "57": [
+    "MEDIUM_FAST",
+    "FIGHTING",
+    "FIGHTING"
+  ],
+  "58": [
+    "SLOW",
+    "FIRE",
+    "FIRE"
+  ],
+  "59": [
+    "SLOW",
+    "FIRE",
+    "FIRE"
+  ],
+  "60": [
+    "MEDIUM_SLOW",
+    "WATER",
+    "WATER"
+  ],
+  "61": [
+    "MEDIUM_SLOW",
+    "WATER",
+    "WATER"
+  ],
+  "62": [
+    "MEDIUM_SLOW",
+    "WATER",
+    "FIGHTING"
+  ],
+  "63": [
+    "MEDIUM_SLOW",
+    "PSYCHIC",
+    "PSYCHIC"
+  ],
+  "64": [
+    "MEDIUM_SLOW",
+    "PSYCHIC",
+    "PSYCHIC"
+  ],
+  "65": [
+    "MEDIUM_SLOW",
+    "PSYCHIC",
+    "PSYCHIC"
+  ],
+  "66": [
+    "MEDIUM_SLOW",
+    "FIGHTING",
+    "FIGHTING"
+  ],
+  "67": [
+    "MEDIUM_SLOW",
+    "FIGHTING",
+    "FIGHTING"
+  ],
+  "68": [
+    "MEDIUM_SLOW",
+    "FIGHTING",
+    "FIGHTING"
+  ],
+  "69": [
+    "MEDIUM_SLOW",
+    "GRASS",
+    "POISON"
+  ],
+  "70": [
+    "MEDIUM_SLOW",
+    "GRASS",
+    "POISON"
+  ],
+  "71": [
+    "MEDIUM_SLOW",
+    "GRASS",
+    "POISON"
+  ],
+  "72": [
+    "SLOW",
+    "WATER",
+    "POISON"
+  ],
+  "73": [
+    "SLOW",
+    "WATER",
+    "POISON"
+  ],
+  "74": [
+    "MEDIUM_SLOW",
+    "ROCK",
+    "GROUND"
+  ],
+  "75": [
+    "MEDIUM_SLOW",
+    "ROCK",
+    "GROUND"
+  ],
+  "76": [
+    "MEDIUM_SLOW",
+    "ROCK",
+    "GROUND"
+  ],
+  "77": [
+    "MEDIUM_FAST",
+    "FIRE",
+    "FIRE"
+  ],
+  "78": [
+    "MEDIUM_FAST",
+    "FIRE",
+    "FIRE"
+  ],
+  "79": [
+    "MEDIUM_FAST",
+    "WATER",
+    "PSYCHIC"
+  ],
+  "80": [
+    "MEDIUM_FAST",
+    "WATER",
+    "PSYCHIC"
+  ],
+  "81": [
+    "MEDIUM_FAST",
+    "ELECTRIC",
+    "STEEL"
+  ],
+  "82": [
+    "MEDIUM_FAST",
+    "ELECTRIC",
+    "STEEL"
+  ],
+  "83": [
+    "MEDIUM_FAST",
+    "NORMAL",
+    "FLYING"
+  ],
+  "84": [
+    "MEDIUM_FAST",
+    "NORMAL",
+    "FLYING"
+  ],
+  "85": [
+    "MEDIUM_FAST",
+    "NORMAL",
+    "FLYING"
+  ],
+  "86": [
+    "MEDIUM_FAST",
+    "WATER",
+    "WATER"
+  ],
+  "87": [
+    "MEDIUM_FAST",
+    "WATER",
+    "ICE"
+  ],
+  "88": [
+    "MEDIUM_FAST",
+    "POISON",
+    "POISON"
+  ],
+  "89": [
+    "MEDIUM_FAST",
+    "POISON",
+    "POISON"
+  ],
+  "90": [
+    "SLOW",
+    "WATER",
+    "WATER"
+  ],
+  "91": [
+    "SLOW",
+    "WATER",
+    "ICE"
+  ],
+  "92": [
+    "MEDIUM_SLOW",
+    "GHOST",
+    "POISON"
+  ],
+  "93": [
+    "MEDIUM_SLOW",
+    "GHOST",
+    "POISON"
+  ],
+  "94": [
+    "MEDIUM_SLOW",
+    "GHOST",
+    "POISON"
+  ],
+  "95": [
+    "MEDIUM_FAST",
+    "ROCK",
+    "GROUND"
+  ],
+  "96": [
+    "MEDIUM_FAST",
+    "PSYCHIC",
+    "PSYCHIC"
+  ],
+  "97": [
+    "MEDIUM_FAST",
+    "PSYCHIC",
+    "PSYCHIC"
+  ],
+  "98": [
+    "MEDIUM_FAST",
+    "WATER",
+    "WATER"
+  ],
+  "99": [
+    "MEDIUM_FAST",
+    "WATER",
+    "WATER"
+  ],
+  "100": [
+    "MEDIUM_FAST",
+    "ELECTRIC",
+    "ELECTRIC"
+  ],
+  "101": [
+    "MEDIUM_FAST",
+    "ELECTRIC",
+    "ELECTRIC"
+  ],
+  "102": [
+    "SLOW",
+    "GRASS",
+    "PSYCHIC"
+  ],
+  "103": [
+    "SLOW",
+    "GRASS",
+    "PSYCHIC"
+  ],
+  "104": [
+    "MEDIUM_FAST",
+    "GROUND",
+    "GROUND"
+  ],
+  "105": [
+    "MEDIUM_FAST",
+    "GROUND",
+    "GROUND"
+  ],
+  "106": [
+    "MEDIUM_FAST",
+    "FIGHTING",
+    "FIGHTING"
+  ],
+  "107": [
+    "MEDIUM_FAST",
+    "FIGHTING",
+    "FIGHTING"
+  ],
+  "108": [
+    "MEDIUM_FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "109": [
+    "MEDIUM_FAST",
+    "POISON",
+    "POISON"
+  ],
+  "110": [
+    "MEDIUM_FAST",
+    "POISON",
+    "POISON"
+  ],
+  "111": [
+    "SLOW",
+    "GROUND",
+    "ROCK"
+  ],
+  "112": [
+    "SLOW",
+    "GROUND",
+    "ROCK"
+  ],
+  "113": [
+    "FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "114": [
+    "MEDIUM_FAST",
+    "GRASS",
+    "GRASS"
+  ],
+  "115": [
+    "MEDIUM_FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "116": [
+    "MEDIUM_FAST",
+    "WATER",
+    "WATER"
+  ],
+  "117": [
+    "MEDIUM_FAST",
+    "WATER",
+    "WATER"
+  ],
+  "118": [
+    "MEDIUM_FAST",
+    "WATER",
+    "WATER"
+  ],
+  "119": [
+    "MEDIUM_FAST",
+    "WATER",
+    "WATER"
+  ],
+  "120": [
+    "SLOW",
+    "WATER",
+    "WATER"
+  ],
+  "121": [
+    "SLOW",
+    "WATER",
+    "PSYCHIC"
+  ],
+  "122": [
+    "MEDIUM_FAST",
+    "PSYCHIC",
+    "PSYCHIC"
+  ],
+  "123": [
+    "MEDIUM_FAST",
+    "BUG",
+    "FLYING"
+  ],
+  "124": [
+    "MEDIUM_FAST",
+    "ICE",
+    "PSYCHIC"
+  ],
+  "125": [
+    "MEDIUM_FAST",
+    "ELECTRIC",
+    "ELECTRIC"
+  ],
+  "126": [
+    "MEDIUM_FAST",
+    "FIRE",
+    "FIRE"
+  ],
+  "127": [
+    "SLOW",
+    "BUG",
+    "BUG"
+  ],
+  "128": [
+    "SLOW",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "129": [
+    "SLOW",
+    "WATER",
+    "WATER"
+  ],
+  "130": [
+    "SLOW",
+    "WATER",
+    "FLYING"
+  ],
+  "131": [
+    "SLOW",
+    "WATER",
+    "ICE"
+  ],
+  "132": [
+    "MEDIUM_FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "133": [
+    "MEDIUM_FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "134": [
+    "MEDIUM_FAST",
+    "WATER",
+    "WATER"
+  ],
+  "135": [
+    "MEDIUM_FAST",
+    "ELECTRIC",
+    "ELECTRIC"
+  ],
+  "136": [
+    "MEDIUM_FAST",
+    "FIRE",
+    "FIRE"
+  ],
+  "137": [
+    "MEDIUM_FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "138": [
+    "MEDIUM_FAST",
+    "ROCK",
+    "WATER"
+  ],
+  "139": [
+    "MEDIUM_FAST",
+    "ROCK",
+    "WATER"
+  ],
+  "140": [
+    "MEDIUM_FAST",
+    "ROCK",
+    "WATER"
+  ],
+  "141": [
+    "MEDIUM_FAST",
+    "ROCK",
+    "WATER"
+  ],
+  "142": [
+    "SLOW",
+    "ROCK",
+    "FLYING"
+  ],
+  "143": [
+    "SLOW",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "144": [
+    "SLOW",
+    "ICE",
+    "FLYING"
+  ],
+  "145": [
+    "SLOW",
+    "ELECTRIC",
+    "FLYING"
+  ],
+  "146": [
+    "SLOW",
+    "FIRE",
+    "FLYING"
+  ],
+  "147": [
+    "SLOW",
+    "DRAGON",
+    "DRAGON"
+  ],
+  "148": [
+    "SLOW",
+    "DRAGON",
+    "DRAGON"
+  ],
+  "149": [
+    "SLOW",
+    "DRAGON",
+    "FLYING"
+  ],
+  "150": [
+    "SLOW",
+    "PSYCHIC",
+    "PSYCHIC"
+  ],
+  "151": [
+    "MEDIUM_SLOW",
+    "PSYCHIC",
+    "PSYCHIC"
+  ],
+  "152": [
+    "MEDIUM_SLOW",
+    "GRASS",
+    "GRASS"
+  ],
+  "153": [
+    "MEDIUM_SLOW",
+    "GRASS",
+    "GRASS"
+  ],
+  "154": [
+    "MEDIUM_SLOW",
+    "GRASS",
+    "GRASS"
+  ],
+  "155": [
+    "MEDIUM_SLOW",
+    "FIRE",
+    "FIRE"
+  ],
+  "156": [
+    "MEDIUM_SLOW",
+    "FIRE",
+    "FIRE"
+  ],
+  "157": [
+    "MEDIUM_SLOW",
+    "FIRE",
+    "FIRE"
+  ],
+  "158": [
+    "MEDIUM_SLOW",
+    "WATER",
+    "WATER"
+  ],
+  "159": [
+    "MEDIUM_SLOW",
+    "WATER",
+    "WATER"
+  ],
+  "160": [
+    "MEDIUM_SLOW",
+    "WATER",
+    "WATER"
+  ],
+  "161": [
+    "MEDIUM_FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "162": [
+    "MEDIUM_FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "163": [
+    "MEDIUM_FAST",
+    "NORMAL",
+    "FLYING"
+  ],
+  "164": [
+    "MEDIUM_FAST",
+    "NORMAL",
+    "FLYING"
+  ],
+  "165": [
+    "FAST",
+    "BUG",
+    "FLYING"
+  ],
+  "166": [
+    "FAST",
+    "BUG",
+    "FLYING"
+  ],
+  "167": [
+    "FAST",
+    "BUG",
+    "POISON"
+  ],
+  "168": [
+    "FAST",
+    "BUG",
+    "POISON"
+  ],
+  "169": [
+    "MEDIUM_FAST",
+    "POISON",
+    "FLYING"
+  ],
+  "170": [
+    "SLOW",
+    "WATER",
+    "ELECTRIC"
+  ],
+  "171": [
+    "SLOW",
+    "WATER",
+    "ELECTRIC"
+  ],
+  "172": [
+    "MEDIUM_FAST",
+    "ELECTRIC",
+    "ELECTRIC"
+  ],
+  "173": [
+    "FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "174": [
+    "FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "175": [
+    "FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "176": [
+    "FAST",
+    "NORMAL",
+    "FLYING"
+  ],
+  "177": [
+    "MEDIUM_FAST",
+    "PSYCHIC",
+    "FLYING"
+  ],
+  "178": [
+    "MEDIUM_FAST",
+    "PSYCHIC",
+    "FLYING"
+  ],
+  "179": [
+    "MEDIUM_SLOW",
+    "ELECTRIC",
+    "ELECTRIC"
+  ],
+  "180": [
+    "MEDIUM_SLOW",
+    "ELECTRIC",
+    "ELECTRIC"
+  ],
+  "181": [
+    "MEDIUM_SLOW",
+    "ELECTRIC",
+    "ELECTRIC"
+  ],
+  "182": [
+    "MEDIUM_SLOW",
+    "GRASS",
+    "GRASS"
+  ],
+  "183": [
+    "FAST",
+    "WATER",
+    "WATER"
+  ],
+  "184": [
+    "FAST",
+    "WATER",
+    "WATER"
+  ],
+  "185": [
+    "MEDIUM_FAST",
+    "ROCK",
+    "ROCK"
+  ],
+  "186": [
+    "MEDIUM_SLOW",
+    "WATER",
+    "WATER"
+  ],
+  "187": [
+    "MEDIUM_SLOW",
+    "GRASS",
+    "FLYING"
+  ],
+  "188": [
+    "MEDIUM_SLOW",
+    "GRASS",
+    "FLYING"
+  ],
+  "189": [
+    "MEDIUM_SLOW",
+    "GRASS",
+    "FLYING"
+  ],
+  "190": [
+    "FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "191": [
+    "MEDIUM_SLOW",
+    "GRASS",
+    "GRASS"
+  ],
+  "192": [
+    "MEDIUM_SLOW",
+    "GRASS",
+    "GRASS"
+  ],
+  "193": [
+    "MEDIUM_FAST",
+    "BUG",
+    "FLYING"
+  ],
+  "194": [
+    "MEDIUM_FAST",
+    "WATER",
+    "GROUND"
+  ],
+  "195": [
+    "MEDIUM_FAST",
+    "WATER",
+    "GROUND"
+  ],
+  "196": [
+    "MEDIUM_FAST",
+    "PSYCHIC",
+    "PSYCHIC"
+  ],
+  "197": [
+    "MEDIUM_FAST",
+    "DARK",
+    "DARK"
+  ],
+  "198": [
+    "MEDIUM_SLOW",
+    "DARK",
+    "FLYING"
+  ],
+  "199": [
+    "MEDIUM_FAST",
+    "WATER",
+    "PSYCHIC"
+  ],
+  "200": [
+    "FAST",
+    "GHOST",
+    "GHOST"
+  ],
+  "201": [
+    "MEDIUM_FAST",
+    "PSYCHIC",
+    "PSYCHIC"
+  ],
+  "202": [
+    "MEDIUM_FAST",
+    "PSYCHIC",
+    "PSYCHIC"
+  ],
+  "203": [
+    "MEDIUM_FAST",
+    "NORMAL",
+    "PSYCHIC"
+  ],
+  "204": [
+    "MEDIUM_FAST",
+    "BUG",
+    "BUG"
+  ],
+  "205": [
+    "MEDIUM_FAST",
+    "BUG",
+    "STEEL"
+  ],
+  "206": [
+    "MEDIUM_FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "207": [
+    "MEDIUM_SLOW",
+    "GROUND",
+    "FLYING"
+  ],
+  "208": [
+    "MEDIUM_FAST",
+    "STEEL",
+    "GROUND"
+  ],
+  "209": [
+    "FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "210": [
+    "FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "211": [
+    "MEDIUM_FAST",
+    "WATER",
+    "POISON"
+  ],
+  "212": [
+    "MEDIUM_FAST",
+    "BUG",
+    "STEEL"
+  ],
+  "213": [
+    "MEDIUM_SLOW",
+    "BUG",
+    "ROCK"
+  ],
+  "214": [
+    "SLOW",
+    "BUG",
+    "FIGHTING"
+  ],
+  "215": [
+    "MEDIUM_SLOW",
+    "DARK",
+    "ICE"
+  ],
+  "216": [
+    "MEDIUM_FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "217": [
+    "MEDIUM_FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "218": [
+    "MEDIUM_FAST",
+    "FIRE",
+    "FIRE"
+  ],
+  "219": [
+    "MEDIUM_FAST",
+    "FIRE",
+    "ROCK"
+  ],
+  "220": [
+    "SLOW",
+    "ICE",
+    "GROUND"
+  ],
+  "221": [
+    "SLOW",
+    "ICE",
+    "GROUND"
+  ],
+  "222": [
+    "FAST",
+    "WATER",
+    "ROCK"
+  ],
+  "223": [
+    "MEDIUM_FAST",
+    "WATER",
+    "WATER"
+  ],
+  "224": [
+    "MEDIUM_FAST",
+    "WATER",
+    "WATER"
+  ],
+  "225": [
+    "FAST",
+    "ICE",
+    "FLYING"
+  ],
+  "226": [
+    "SLOW",
+    "WATER",
+    "FLYING"
+  ],
+  "227": [
+    "SLOW",
+    "STEEL",
+    "FLYING"
+  ],
+  "228": [
+    "SLOW",
+    "DARK",
+    "FIRE"
+  ],
+  "229": [
+    "SLOW",
+    "DARK",
+    "FIRE"
+  ],
+  "230": [
+    "MEDIUM_FAST",
+    "WATER",
+    "DRAGON"
+  ],
+  "231": [
+    "MEDIUM_FAST",
+    "GROUND",
+    "GROUND"
+  ],
+  "232": [
+    "MEDIUM_FAST",
+    "GROUND",
+    "GROUND"
+  ],
+  "233": [
+    "MEDIUM_FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "234": [
+    "SLOW",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "235": [
+    "FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "236": [
+    "MEDIUM_FAST",
+    "FIGHTING",
+    "FIGHTING"
+  ],
+  "237": [
+    "MEDIUM_FAST",
+    "FIGHTING",
+    "FIGHTING"
+  ],
+  "238": [
+    "MEDIUM_FAST",
+    "ICE",
+    "PSYCHIC"
+  ],
+  "239": [
+    "MEDIUM_FAST",
+    "ELECTRIC",
+    "ELECTRIC"
+  ],
+  "240": [
+    "MEDIUM_FAST",
+    "FIRE",
+    "FIRE"
+  ],
+  "241": [
+    "SLOW",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "242": [
+    "FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "243": [
+    "SLOW",
+    "ELECTRIC",
+    "ELECTRIC"
+  ],
+  "244": [
+    "SLOW",
+    "FIRE",
+    "FIRE"
+  ],
+  "245": [
+    "SLOW",
+    "WATER",
+    "WATER"
+  ],
+  "246": [
+    "SLOW",
+    "ROCK",
+    "GROUND"
+  ],
+  "247": [
+    "SLOW",
+    "ROCK",
+    "GROUND"
+  ],
+  "248": [
+    "SLOW",
+    "ROCK",
+    "DARK"
+  ],
+  "249": [
+    "SLOW",
+    "PSYCHIC",
+    "FLYING"
+  ],
+  "250": [
+    "SLOW",
+    "FIRE",
+    "FLYING"
+  ],
+  "251": [
+    "MEDIUM_SLOW",
+    "PSYCHIC",
+    "GRASS"
+  ],
+  "277": [
+    "MEDIUM_SLOW",
+    "GRASS",
+    "GRASS"
+  ],
+  "278": [
+    "MEDIUM_SLOW",
+    "GRASS",
+    "GRASS"
+  ],
+  "279": [
+    "MEDIUM_SLOW",
+    "GRASS",
+    "GRASS"
+  ],
+  "280": [
+    "MEDIUM_SLOW",
+    "FIRE",
+    "FIRE"
+  ],
+  "281": [
+    "MEDIUM_SLOW",
+    "FIRE",
+    "FIGHTING"
+  ],
+  "282": [
+    "MEDIUM_SLOW",
+    "FIRE",
+    "FIGHTING"
+  ],
+  "283": [
+    "MEDIUM_SLOW",
+    "WATER",
+    "WATER"
+  ],
+  "284": [
+    "MEDIUM_SLOW",
+    "WATER",
+    "GROUND"
+  ],
+  "285": [
+    "MEDIUM_SLOW",
+    "WATER",
+    "GROUND"
+  ],
+  "286": [
+    "MEDIUM_FAST",
+    "DARK",
+    "DARK"
+  ],
+  "287": [
+    "MEDIUM_FAST",
+    "DARK",
+    "DARK"
+  ],
+  "288": [
+    "MEDIUM_FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "289": [
+    "MEDIUM_FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "290": [
+    "MEDIUM_FAST",
+    "BUG",
+    "BUG"
+  ],
+  "291": [
+    "MEDIUM_FAST",
+    "BUG",
+    "BUG"
+  ],
+  "292": [
+    "MEDIUM_FAST",
+    "BUG",
+    "FLYING"
+  ],
+  "293": [
+    "MEDIUM_FAST",
+    "BUG",
+    "BUG"
+  ],
+  "294": [
+    "MEDIUM_FAST",
+    "BUG",
+    "POISON"
+  ],
+  "295": [
+    "MEDIUM_SLOW",
+    "WATER",
+    "GRASS"
+  ],
+  "296": [
+    "MEDIUM_SLOW",
+    "WATER",
+    "GRASS"
+  ],
+  "297": [
+    "MEDIUM_SLOW",
+    "WATER",
+    "GRASS"
+  ],
+  "298": [
+    "MEDIUM_SLOW",
+    "GRASS",
+    "GRASS"
+  ],
+  "299": [
+    "MEDIUM_SLOW",
+    "GRASS",
+    "DARK"
+  ],
+  "300": [
+    "MEDIUM_SLOW",
+    "GRASS",
+    "DARK"
+  ],
+  "301": [
+    "ERRATIC",
+    "BUG",
+    "GROUND"
+  ],
+  "302": [
+    "ERRATIC",
+    "BUG",
+    "FLYING"
+  ],
+  "303": [
+    "ERRATIC",
+    "BUG",
+    "GHOST"
+  ],
+  "304": [
+    "MEDIUM_SLOW",
+    "NORMAL",
+    "FLYING"
+  ],
+  "305": [
+    "MEDIUM_SLOW",
+    "NORMAL",
+    "FLYING"
+  ],
+  "306": [
+    "FLUCTUATING",
+    "GRASS",
+    "GRASS"
+  ],
+  "307": [
+    "FLUCTUATING",
+    "GRASS",
+    "FIGHTING"
+  ],
+  "308": [
+    "FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "309": [
+    "MEDIUM_FAST",
+    "WATER",
+    "FLYING"
+  ],
+  "310": [
+    "MEDIUM_FAST",
+    "WATER",
+    "FLYING"
+  ],
+  "311": [
+    "MEDIUM_FAST",
+    "BUG",
+    "WATER"
+  ],
+  "312": [
+    "MEDIUM_FAST",
+    "BUG",
+    "FLYING"
+  ],
+  "313": [
+    "FLUCTUATING",
+    "WATER",
+    "WATER"
+  ],
+  "314": [
+    "FLUCTUATING",
+    "WATER",
+    "WATER"
+  ],
+  "315": [
+    "FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "316": [
+    "FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "317": [
+    "MEDIUM_SLOW",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "318": [
+    "MEDIUM_FAST",
+    "GROUND",
+    "PSYCHIC"
+  ],
+  "319": [
+    "MEDIUM_FAST",
+    "GROUND",
+    "PSYCHIC"
+  ],
+  "320": [
+    "MEDIUM_FAST",
+    "ROCK",
+    "ROCK"
+  ],
+  "321": [
+    "MEDIUM_FAST",
+    "FIRE",
+    "FIRE"
+  ],
+  "322": [
+    "MEDIUM_SLOW",
+    "DARK",
+    "GHOST"
+  ],
+  "323": [
+    "MEDIUM_FAST",
+    "WATER",
+    "GROUND"
+  ],
+  "324": [
+    "MEDIUM_FAST",
+    "WATER",
+    "GROUND"
+  ],
+  "325": [
+    "FAST",
+    "WATER",
+    "WATER"
+  ],
+  "326": [
+    "FLUCTUATING",
+    "WATER",
+    "WATER"
+  ],
+  "327": [
+    "FLUCTUATING",
+    "WATER",
+    "DARK"
+  ],
+  "328": [
+    "ERRATIC",
+    "WATER",
+    "WATER"
+  ],
+  "329": [
+    "ERRATIC",
+    "WATER",
+    "WATER"
+  ],
+  "330": [
+    "SLOW",
+    "WATER",
+    "DARK"
+  ],
+  "331": [
+    "SLOW",
+    "WATER",
+    "DARK"
+  ],
+  "332": [
+    "MEDIUM_SLOW",
+    "GROUND",
+    "GROUND"
+  ],
+  "333": [
+    "MEDIUM_SLOW",
+    "GROUND",
+    "DRAGON"
+  ],
+  "334": [
+    "MEDIUM_SLOW",
+    "GROUND",
+    "DRAGON"
+  ],
+  "335": [
+    "FLUCTUATING",
+    "FIGHTING",
+    "FIGHTING"
+  ],
+  "336": [
+    "FLUCTUATING",
+    "FIGHTING",
+    "FIGHTING"
+  ],
+  "337": [
+    "SLOW",
+    "ELECTRIC",
+    "ELECTRIC"
+  ],
+  "338": [
+    "SLOW",
+    "ELECTRIC",
+    "ELECTRIC"
+  ],
+  "339": [
+    "MEDIUM_FAST",
+    "FIRE",
+    "GROUND"
+  ],
+  "340": [
+    "MEDIUM_FAST",
+    "FIRE",
+    "GROUND"
+  ],
+  "341": [
+    "MEDIUM_SLOW",
+    "ICE",
+    "WATER"
+  ],
+  "342": [
+    "MEDIUM_SLOW",
+    "ICE",
+    "WATER"
+  ],
+  "343": [
+    "MEDIUM_SLOW",
+    "ICE",
+    "WATER"
+  ],
+  "344": [
+    "MEDIUM_SLOW",
+    "GRASS",
+    "GRASS"
+  ],
+  "345": [
+    "MEDIUM_SLOW",
+    "GRASS",
+    "DARK"
+  ],
+  "346": [
+    "MEDIUM_FAST",
+    "ICE",
+    "ICE"
+  ],
+  "347": [
+    "MEDIUM_FAST",
+    "ICE",
+    "ICE"
+  ],
+  "348": [
+    "FAST",
+    "ROCK",
+    "PSYCHIC"
+  ],
+  "349": [
+    "FAST",
+    "ROCK",
+    "PSYCHIC"
+  ],
+  "350": [
+    "FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "351": [
+    "FAST",
+    "PSYCHIC",
+    "PSYCHIC"
+  ],
+  "352": [
+    "FAST",
+    "PSYCHIC",
+    "PSYCHIC"
+  ],
+  "353": [
+    "MEDIUM_FAST",
+    "ELECTRIC",
+    "ELECTRIC"
+  ],
+  "354": [
+    "MEDIUM_FAST",
+    "ELECTRIC",
+    "ELECTRIC"
+  ],
+  "355": [
+    "FAST",
+    "STEEL",
+    "STEEL"
+  ],
+  "356": [
+    "MEDIUM_FAST",
+    "FIGHTING",
+    "PSYCHIC"
+  ],
+  "357": [
+    "MEDIUM_FAST",
+    "FIGHTING",
+    "PSYCHIC"
+  ],
+  "358": [
+    "ERRATIC",
+    "NORMAL",
+    "FLYING"
+  ],
+  "359": [
+    "ERRATIC",
+    "DRAGON",
+    "FLYING"
+  ],
+  "360": [
+    "MEDIUM_FAST",
+    "PSYCHIC",
+    "PSYCHIC"
+  ],
+  "361": [
+    "FAST",
+    "GHOST",
+    "GHOST"
+  ],
+  "362": [
+    "FAST",
+    "GHOST",
+    "GHOST"
+  ],
+  "363": [
+    "MEDIUM_SLOW",
+    "GRASS",
+    "POISON"
+  ],
+  "364": [
+    "SLOW",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "365": [
+    "SLOW",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "366": [
+    "SLOW",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "367": [
+    "FLUCTUATING",
+    "POISON",
+    "POISON"
+  ],
+  "368": [
+    "FLUCTUATING",
+    "POISON",
+    "POISON"
+  ],
+  "369": [
+    "SLOW",
+    "GRASS",
+    "FLYING"
+  ],
+  "370": [
+    "MEDIUM_SLOW",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "371": [
+    "MEDIUM_SLOW",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "372": [
+    "MEDIUM_SLOW",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "373": [
+    "ERRATIC",
+    "WATER",
+    "WATER"
+  ],
+  "374": [
+    "ERRATIC",
+    "WATER",
+    "WATER"
+  ],
+  "375": [
+    "ERRATIC",
+    "WATER",
+    "WATER"
+  ],
+  "376": [
+    "MEDIUM_SLOW",
+    "DARK",
+    "DARK"
+  ],
+  "377": [
+    "FAST",
+    "GHOST",
+    "GHOST"
+  ],
+  "378": [
+    "FAST",
+    "GHOST",
+    "GHOST"
+  ],
+  "379": [
+    "FLUCTUATING",
+    "POISON",
+    "POISON"
+  ],
+  "380": [
+    "ERRATIC",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "381": [
+    "SLOW",
+    "WATER",
+    "ROCK"
+  ],
+  "382": [
+    "SLOW",
+    "STEEL",
+    "ROCK"
+  ],
+  "383": [
+    "SLOW",
+    "STEEL",
+    "ROCK"
+  ],
+  "384": [
+    "SLOW",
+    "STEEL",
+    "ROCK"
+  ],
+  "385": [
+    "MEDIUM_FAST",
+    "NORMAL",
+    "NORMAL"
+  ],
+  "386": [
+    "ERRATIC",
+    "BUG",
+    "BUG"
+  ],
+  "387": [
+    "FLUCTUATING",
+    "BUG",
+    "BUG"
+  ],
+  "388": [
+    "ERRATIC",
+    "ROCK",
+    "GRASS"
+  ],
+  "389": [
+    "ERRATIC",
+    "ROCK",
+    "GRASS"
+  ],
+  "390": [
+    "ERRATIC",
+    "ROCK",
+    "BUG"
+  ],
+  "391": [
+    "ERRATIC",
+    "ROCK",
+    "BUG"
+  ],
+  "392": [
+    "SLOW",
+    "PSYCHIC",
+    "PSYCHIC"
+  ],
+  "393": [
+    "SLOW",
+    "PSYCHIC",
+    "PSYCHIC"
+  ],
+  "394": [
+    "SLOW",
+    "PSYCHIC",
+    "PSYCHIC"
+  ],
+  "395": [
+    "SLOW",
+    "DRAGON",
+    "DRAGON"
+  ],
+  "396": [
+    "SLOW",
+    "DRAGON",
+    "DRAGON"
+  ],
+  "397": [
+    "SLOW",
+    "DRAGON",
+    "FLYING"
+  ],
+  "398": [
+    "SLOW",
+    "STEEL",
+    "PSYCHIC"
+  ],
+  "399": [
+    "SLOW",
+    "STEEL",
+    "PSYCHIC"
+  ],
+  "400": [
+    "SLOW",
+    "STEEL",
+    "PSYCHIC"
+  ],
+  "401": [
+    "SLOW",
+    "ROCK",
+    "ROCK"
+  ],
+  "402": [
+    "SLOW",
+    "ICE",
+    "ICE"
+  ],
+  "403": [
+    "SLOW",
+    "STEEL",
+    "STEEL"
+  ],
+  "404": [
+    "SLOW",
+    "WATER",
+    "WATER"
+  ],
+  "405": [
+    "SLOW",
+    "GROUND",
+    "GROUND"
+  ],
+  "406": [
+    "SLOW",
+    "DRAGON",
+    "FLYING"
+  ],
+  "407": [
+    "SLOW",
+    "DRAGON",
+    "PSYCHIC"
+  ],
+  "408": [
+    "SLOW",
+    "DRAGON",
+    "PSYCHIC"
+  ],
+  "409": [
+    "SLOW",
+    "STEEL",
+    "PSYCHIC"
+  ],
+  "410": [
+    "SLOW",
+    "PSYCHIC",
+    "PSYCHIC"
+  ],
+  "411": [
+    "FAST",
+    "PSYCHIC",
+    "PSYCHIC"
+  ]
+}
