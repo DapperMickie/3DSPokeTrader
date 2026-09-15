@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "poke-trader-bridge"
+version = "0.1.0"
+description = "FRLG save exchange bridge for a homebrew 3DS and a retail Switch"
+requires-python = ">=3.12"
+license = "AGPL-3.0-or-later"
+
+[project.scripts]
+poke-trader = "poketrader.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["poketrader*"]
+
+[tool.setuptools.package-data]
+poketrader = ["species.json"]

@@ -1,0 +1,9 @@
+*
+!3ds/
+!3ds/**
+!Dockerfile.build
+3ds/build/
+3ds/*.elf
+3ds/*.3dsx
+3ds/*.smdh
+3ds/*.map

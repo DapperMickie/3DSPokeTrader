@@ -1,0 +1,25 @@
+name: Check and build
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -v
+      - run: sh scripts/test-native.sh
+  build-3ds:
+    runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkitarm@sha256:15b79ce75822c289538d8153da5fa7aafe5e6adc32ad8a575a197beca0f0761b
+    steps:
+      - uses: actions/checkout@v4
+      - run: make -C 3ds
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PokeTrader-3ds
+          path: |
+            3ds/PokeTrader.3dsx
+            3ds/PokeTrader.smdh

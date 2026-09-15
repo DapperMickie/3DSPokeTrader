@@ -1,0 +1,4 @@
+FROM devkitpro/devkitarm@sha256:15b79ce75822c289538d8153da5fa7aafe5e6adc32ad8a575a197beca0f0761b
+WORKDIR /work/3ds
+COPY 3ds/ /work/3ds/
+RUN make
