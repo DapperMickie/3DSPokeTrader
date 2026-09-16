@@ -8,6 +8,7 @@ from __future__ import annotations
 import importlib
 from pathlib import Path
 import sys
+import os
 
 from .save import Pokemon, encode_box
 from .storage import atomic_write
@@ -71,6 +72,9 @@ def main():
     install_scan_dwell(ldn)
     install_commit_writer(module, config)
     install_party_loader(module)
+    if os.environ.get("POKETRADER_REMOTE_GATE"):
+        from .remote_gate import install
+        install(module, Path(os.environ["POKETRADER_REMOTE_GATE"]))
     return module.main(sys.argv[2:])
 
 

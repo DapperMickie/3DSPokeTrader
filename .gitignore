@@ -5,7 +5,14 @@
 __pycache__/
 *.py[cod]
 *.egg-info/
+/build/
 bridge-data/
+remote-switch-data/
+*.remote.json
+relay-credential
+deploy/relay/secrets/
+deploy/relay/.env
+.codex-tmp/
 *.sav
 *.srm
 *.pk3

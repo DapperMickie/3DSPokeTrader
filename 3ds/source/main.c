@@ -267,6 +267,7 @@ static void recover(Pending *p) {
         field(&r,2,received,sizeof(received)); field(&r,3,mode,sizeof(mode));
         field(&r,4,result_hash,sizeof(result_hash));
         char offered_art[32],received_art[32];
+        char revision[80]; field(&r,7,revision,sizeof(revision));
         field(&r,5,offered_art,sizeof(offered_art)); field(&r,6,received_art,sizeof(received_art));
         ui_trade_art(offered_art,received_art); response_free(&r);
         if(strcmp(previous_state,state)) { strcpy(previous_state,state); animation_start=osGetTime(); }
@@ -294,11 +295,21 @@ static void recover(Pending *p) {
         do {
             ui_status_frame(state,detail,received,mode,(unsigned)(osGetTime()-animation_start)); present();
             k=buttons();
-        } while(!exiting && !(k&(KEY_A|KEY_B|KEY_START|KEY_TOUCH)) &&
-                (strcmp(state,"running") || osGetTime()-poll_start<2000));
+        } while(!exiting && !(k&(KEY_A|KEY_B|KEY_X|KEY_START|KEY_TOUCH)) &&
+                ((strcmp(state,"running") && strcmp(state,"remote_pair") && strcmp(state,"remote_offer")) || osGetTime()-poll_start<2000));
         if(k&KEY_TOUCH) { touchPosition t; hidTouchRead(&t); if(t.py>=210) k|=t.px<103?KEY_B:KEY_A; }
         if(k&KEY_START) { exiting=1; return; }
         if(k&KEY_B) return;
+        if(k&KEY_X && !strncmp(mode,"REMOTE",6)) {
+            snprintf(path,sizeof(path),"/v1/trades/%s/cancel",p->id);
+            if(call("POST",path,NULL,0,&r)<0) { response_free(&r); message("Recovery retained",error); continue; }
+            response_free(&r);
+        }
+        if(k&KEY_A && (!strcmp(state,"remote_pair") || !strcmp(state,"remote_offer"))) {
+            snprintf(path,sizeof(path),"/v1/trades/%s/%s",p->id,!strcmp(state,"remote_pair")?"verify":"approve");
+            if(call("POST",path,revision,strlen(revision),&r)<0) { response_free(&r); message("Refresh exchange",error); continue; }
+            response_free(&r);
+        }
         if(k&KEY_A && (!strcmp(state,"prepared") || !strcmp(state,"received"))) {
             snprintf(path,sizeof(path),"/v1/trades/%s/%s",p->id,!strcmp(state,"prepared")?"start":"confirm");
             if(call("POST",path,NULL,0,&r)<0) { response_free(&r); message("Transaction retained",error); return; }

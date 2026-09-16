@@ -1,0 +1,6 @@
+{$RELAY_HOST} {
+    request_body {
+        max_size 16KB
+    }
+    reverse_proxy relay:8780
+}

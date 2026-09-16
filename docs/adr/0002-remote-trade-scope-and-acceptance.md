@@ -4,6 +4,6 @@ The first remote release targets 3DS and Switch trades between cooperative frien
 
 Approvals bind to the exact pair of offers, and changing either offer clears both approvals. Once either side may have committed, the exchange must not expire automatically; both bridges retain recovery data and block conflicting trades until resolution.
 
-The current backend does not expose a pre-commit remote approval step. Inspection of the pinned upstream engine shows that it receives the Switch party and selected slot before automatically confirming. An asynchronous approval gate requires an engine extension and hardware validation of delayed approval, cancellation, reselection and disconnects. This decision records intended behavior, not an implemented capability.
+At decision time, the backend did not expose a pre-commit remote approval step. Inspection of the pinned upstream engine showed that it receives the Switch party and selected slot before automatically confirming. The experimental implementation now adds an asynchronous approval gate; hardware validation of delayed approval, cancellation, reselection and disconnects remains required.
 
 Source: [Pinned trade engine](https://github.com/tornadus/frlg-ldn-trade/blob/13809c21b6e992097f98453b7cbc9e2bc30bbf7c/frlgsim/trade.py).

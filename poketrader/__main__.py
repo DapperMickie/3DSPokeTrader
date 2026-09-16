@@ -47,6 +47,8 @@ def main(argv=None):
     mode = serve.add_mutually_exclusive_group(required=True)
     mode.add_argument("--upstream", type=Path)
     mode.add_argument("--demo-receive", type=Path, help="Rehearsal only: receive this decrypted 80-byte PK3")
+    mode.add_argument("--remote", type=Path, help="Optional source remote config; local-only remains default")
+    serve.add_argument("--experimental-remote", action="store_true")
     serve.add_argument("--keys", type=Path, default=Path("~/.switch/prod.keys"))
     serve.add_argument("--phy", default="phy1")
     serve.add_argument("--python", default=sys.executable, help="Python interpreter with upstream dependencies installed")
@@ -54,9 +56,80 @@ def main(argv=None):
     resolve.add_argument("trade_id")
     resolve.add_argument("--data", type=Path, default=Path("bridge-data"))
     resolve.add_argument("--neither-side-traded", action="store_true", required=True)
+    relay = sub.add_parser("relay", help="Run the optional self-hosted relay behind HTTPS")
+    relay.add_argument("--credential-file", type=Path, required=True)
+    relay.add_argument("--bind", default="127.0.0.1")
+    relay.add_argument("--port", type=int, default=8780)
+    remote = sub.add_parser("remote-config", help="Create a private room config for one exchange")
+    remote.add_argument("--relay", required=True)
+    remote.add_argument("--credential-file", type=Path, required=True)
+    remote.add_argument("--role", choices=("source", "switch"), required=True)
+    remote.add_argument("--room", help="Room code from the source player; Switch users can also join from the browser")
+    remote.add_argument("--output", type=Path, required=True)
+    switch = sub.add_parser("remote-switch", help="Experimental Switch endpoint and local browser controls")
+    switch.add_argument("--remote", type=Path, required=True)
+    switch.add_argument("--data", type=Path, default=Path("remote-switch-data"))
+    switch.add_argument("--upstream", type=Path, required=True)
+    switch.add_argument("--keys", type=Path, default=Path("~/.switch/prod.keys"))
+    switch.add_argument("--phy", default="phy1")
+    switch.add_argument("--python", default=sys.executable)
+    switch.add_argument("--bind", default="127.0.0.1", help="Use a private LAN IP to allow phone access")
+    switch.add_argument("--port", type=int, default=8766)
+    switch.add_argument("--experimental-remote", action="store_true", required=True)
+    reconcile = sub.add_parser("remote-resolve-no-trade", help="Reconcile an uncertain remote exchange after checking both consoles")
+    reconcile.add_argument("--remote", type=Path, required=True)
+    reconcile.add_argument("--data", type=Path, required=True)
+    reconcile.add_argument("--neither-side-traded", action="store_true", required=True)
     args = parser.parse_args(argv)
     try:
-        if args.command == "inspect":
+        if args.command == "relay":
+            from .relay import Relay
+            server = Relay((args.bind, args.port), args.credential_file.read_text().strip())
+            print(f"Relay listening on {args.bind}:{args.port}; HTTPS reverse proxy required.", flush=True)
+            try:
+                server.serve_forever()
+            finally:
+                server.server_close()
+        elif args.command == "remote-config":
+            from .remote import configure
+            room = configure(args.output, args.relay, args.credential_file.read_text().strip(), args.role, args.room)
+            print(f"Room code: {room}. Share the code with your friend. Keep the config private for recovery.")
+        elif args.command == "remote-resolve-no-trade":
+            from .remote import Peer
+            with exclusive(args.data):
+                remote_config = read_json(args.remote)
+                peer = Peer(args.remote, args.data / "rooms" / remote_config["room"])
+                if peer.config["role"] != "switch":
+                    raise ValueError("Reconcile on the Switch bridge")
+                local, _ = peer.values()
+                if local.get("phase") not in ("uncertain", "running", "offer", "committing"):
+                    raise ValueError("Only an interrupted exchange can be reconciled")
+                if (peer.root / "exchange/received.pk3").exists():
+                    raise ValueError("A receipt exists; inspect it instead of declaring no trade")
+                peer.update(phase="cancelled", approval=None, message="Operator checked both consoles: no trade occurred.")
+                print("Recorded no trade. Restart the Switch bridge to notify the source bridge; use a new room for another exchange.")
+        elif args.command == "remote-switch":
+            import threading
+            from .remote import SwitchWorker
+            from .remote_ui import Controls
+            with exclusive(args.data):
+                token_path = args.data / "control-token"
+                if not token_path.exists():
+                    atomic_write(token_path, secrets.token_hex(16).encode())
+                backend = LiveBackend(args.upstream, args.keys, args.phy, args.python)
+                backend.preflight()
+                worker = SwitchWorker(args.remote, args.data, backend)
+                server = Controls((args.bind, args.port), worker, token_path.read_text().strip())
+                thread = threading.Thread(target=worker.run, daemon=True)
+                thread.start()
+                print(f"Experimental controls: http://{args.bind}:{args.port}; local token is in {token_path}.", flush=True)
+                try:
+                    server.serve_forever()
+                finally:
+                    server.server_close()
+                    worker.close()
+                    thread.join(10)
+        elif args.command == "inspect":
             save = Save(args.save.read_bytes())
             print(f"FRLG | {save.trainer} | TID {save.trainer_id & 65535:05d}")
             print(save.warning or "Both save slots valid.")
@@ -75,10 +148,16 @@ def main(argv=None):
             if len(fields) != 3 or len(fields[2]) != 32 or any(c not in "0123456789abcdef" for c in fields[2]):
                 raise ValueError("Invalid pairing config; run the pair command.")
             port, token = int(fields[1]), fields[2]
-            backend = (DemoBackend(args.demo_receive.read_bytes()) if args.demo_receive else
-                       LiveBackend(args.upstream, args.keys, args.phy, args.python))
-            backend.preflight()
             with exclusive(args.data):
+                if args.remote:
+                    if not args.experimental_remote:
+                        raise ValueError("Remote hardware validation is incomplete; use --experimental-remote to opt in")
+                    from .remote import RemoteBackend
+                    backend = RemoteBackend(args.remote, args.data / "remote")
+                else:
+                    backend = (DemoBackend(args.demo_receive.read_bytes()) if args.demo_receive else
+                               LiveBackend(args.upstream, args.keys, args.phy, args.python))
+                backend.preflight()
                 service = Service(args.data, backend)
                 server = Server((args.bind, port), service, token)
                 print(f"{backend.label}: bridge listening on {args.bind}:{port}", flush=True)
@@ -99,6 +178,11 @@ def main(argv=None):
     except KeyboardInterrupt:
         print("Bridge stopped. Unfinished trades require recovery; do not automatically repeat them.")
         return 130
+    except ModuleNotFoundError as exc:
+        if exc.name == "cryptography":
+            print("Remote mode requires: python -m pip install '.[remote]'", file=sys.stderr)
+            return 1
+        raise
 
 
 if __name__ == "__main__":

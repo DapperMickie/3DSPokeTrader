@@ -9,6 +9,9 @@ description = "FRLG save exchange bridge for a homebrew 3DS and a retail Switch"
 requires-python = ">=3.12"
 license = "AGPL-3.0-or-later"
 
+[project.optional-dependencies]
+remote = ["cryptography>=46,<51"]
+
 [project.scripts]
 poke-trader = "poketrader.__main__:main"
 
@@ -16,4 +19,4 @@ poke-trader = "poketrader.__main__:main"
 include = ["poketrader*"]
 
 [tool.setuptools.package-data]
-poketrader = ["species.json", "species-info.json"]
+poketrader = ["species.json", "species-info.json", "remote.html", "art.bin"]

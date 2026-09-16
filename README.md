@@ -12,6 +12,8 @@ Get the current 3DS app and Linux bridge from the [latest GitHub release](https:
 
 See [How to run PokeTrader](docs/how-to-run.md) for installation, setup, trading, recovery, and build instructions.
 
+This branch also includes [experimental remote trading](docs/remote-trading.md) through two bridges and an optional self-hosted relay. Local-only operation remains the default; physical remote-trade validation is still required.
+
 ## Current status
 
 PokeTrader is still a hardware-test build. Save handling, recovery, and communication between the app and bridge have automated tests, but only a hand full of complete physical 3DS-to-Switch trades have been confirmed.

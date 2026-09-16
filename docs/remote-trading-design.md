@@ -1,6 +1,6 @@
 # Remote trading design interview
 
-Design in progress. Decisions recorded here do not authorize implementation before the interview reaches shared understanding.
+The user confirmed shared understanding and authorized implementation on `codex/remote-trading-design`. See [setup and validation](remote-trading.md) for the experimental implementation.
 
 ## Agreed user controls
 
@@ -32,7 +32,7 @@ Remote-trading design and subsequent implementation belong on a separate branch.
 
 ## Remaining design closure
 
-Confirm the consolidated scope with the user before implementation. Exact approval-wait limits remain a hardware experiment, not a settled protocol guarantee.
+The design interview is complete. Exact approval-wait limits remain a hardware experiment, not a settled protocol guarantee.
 
 ## Protocol prerequisite
 

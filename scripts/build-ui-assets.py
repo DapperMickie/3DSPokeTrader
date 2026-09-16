@@ -59,6 +59,7 @@ for item in art:
     header += struct.pack("<II", offset, len(item))
     offset += len(item)
 (OUT/"art.bin").write_bytes(header + b"".join(art))
+(ROOT/"poketrader/art.bin").write_bytes(header + b"".join(art))
 print("Baked 386 normal and 386 shiny FRLG portraits.", flush=True)
 
 url = f"https://raw.githubusercontent.com/google/fonts/{FONTS}/ofl/vt323/VT323-Regular.ttf"
