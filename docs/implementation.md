@@ -35,9 +35,9 @@ Two wrapper adaptations are needed:
 
 In local mode, the wrapper does not change packet parsing, session discovery, the offered-slot protocol, timing, or the trade state machine. It offers party slot 1 and uses a real party member from the source save in non-offered slot 0. The companion is not removed from the save. Bridge trainer name is `3DSLINK`, within the seven-character limit.
 
-The optional [experimental remote mode](remote-trading.md) installs an approval gate before the upstream engine confirms its trade. It keeps the simulator ticking while the two players inspect and approve the exact offers. The relay carries encrypted snapshots; each bridge retains recovery records. Remote mode must be selected explicitly and still requires hardware timing validation.
+The optional [experimental remote mode](remote-trading.md) installs a gate before the upstream engine confirms its trade. A private room admits one pinned bridge identity per role. Once the source bridge validates the current Switch offer, both trusted bridges accept that revision automatically. The relay carries encrypted snapshots; each bridge retains recovery records. Remote mode must be selected explicitly and still requires hardware timing validation.
 
-A receipt can precede the console's final save or the process exiting. The service waits for process completion and explicit user confirmation that the Switch has saved and left the room. It does not infer console persistence from the receipt alone.
+A receipt can precede the console's final save, so the service waits for the Switch-side process to exit and verifies that its receipt matches the accepted offer. A matching receipt from the completed process releases the source result automatically.
 
 ## Transaction states
 

@@ -48,9 +48,7 @@ poke-trader remote-config --relay https://relay.example.com \
   --output switch.remote.json
 ```
 
-The Switch player can omit `--room` during setup and enter their friend's code in the browser's Join room form instead. The browser saves the chosen room for restart recovery. Once a pairing is verified, switching rooms is blocked until that exchange is completed or safely cancelled.
-
-Keep both config files and both data directories. They contain the identities and recovery records for this exchange. Each room supports one exchange; the source player creates a new config, room and data directory for the next exchange. The Switch player can then join the new room in their browser; that bridge retains separate recovery records under `rooms/ROOM_CODE`. Do not replace a pending exchange's config or delete its recovery records. No account registration is required.
+Keep both config files and both data directories. They contain the pinned bridge identities and recovery records. Each relay room has exactly one source slot and one Switch slot. A different identity cannot replace either occupant while the room is active. After both bridges record successful completion, they clear only the finished exchange state and reuse the same room for the next trade. Do not replace a pending exchange's config or delete its recovery records. No account registration or browser control page is required.
 
 ## Run a trade
 
@@ -66,23 +64,22 @@ On the Switch bridge, replace the example address and upstream path:
 ```sh
 poke-trader remote-switch --remote switch.remote.json --data remote-switch-data \
   --upstream /path/to/frlg-ldn-trade --keys ~/.switch/prod.keys --phy phy1 \
-  --bind 192.168.1.60 --experimental-remote
+  --experimental-remote
 ```
 
 Use the Python interpreter with the required upstream dependencies, or pass `--python /path/to/venv/bin/python` as for local trading. If radio access requires root, use the same local privilege setup as the existing bridge.
 
-1. Open `http://192.168.1.60:8766` on a phone or computer on the Switch bridge's private network. Enter the token from `remote-switch-data/control-token`. It is a local control token, not the relay credential.
-2. Run the rebuilt 3DS app from this branch. Select the source save and Pokemon as usual, then start the exchange. Older 3DS builds do not have remote approval controls.
-3. Compare the verification code shown on the 3DS and browser through your existing chat. Confirm a match on both. Do not approve mismatched codes. Pairing is retained across restarts of the same room.
-4. The Switch player leads the normal Direct Corner trade, accepts `3DSLINK`, sits on the left and selects a Pokemon.
-5. Both players inspect the offers using the existing species/nickname summaries and sprites. Approve on the 3DS with A and in the Switch player's browser. A changed offer clears both approvals. The source bridge validates compatibility with its save before either bridge can authorize the exchange.
-6. After the Switch trade finishes, the Switch player checks the received Pokemon, saves and exits the trading room, then confirms this in the browser. The 3DS retrieves and verifies its replacement save through the existing backup and application procedure.
+1. Run the rebuilt 3DS app from this branch. Select the source save and Pokemon as usual, then start the exchange.
+2. The bridges recognize the one pinned peer in each room and establish their encrypted channel automatically.
+3. The Switch player leads the normal Direct Corner trade, accepts `3DSLINK`, sits on the left and selects a Pokemon.
+4. The source bridge validates the selected Switch Pokemon against the source save. Both bridges automatically accept the current validated offer revision.
+5. When the Switch-side process finishes with the matching receipt, the bridges automatically release and apply the replacement 3DS save.
 
-X on the 3DS requests cancellation or recovery. The browser has the same action. Before commitment, the Switch engine declines the proposed exchange. After commitment may have started, the exchange remains pending for recovery; cancellation does not roll back a console save. B returns home without cancelling.
+X on the 3DS requests cancellation or recovery. Before commitment, the Switch engine declines the proposed exchange. After commitment may have started, the exchange remains pending for recovery; cancellation does not roll back a console save. B returns home without cancelling.
 
 ## Recover an interruption
 
-Restart each command with its original config and data directory, then resume the pending trade on the 3DS. Bridges automatically exchange retained status again. A valid received record still requires the Switch player's save confirmation. A missing or mismatched record leaves the exchange uncertain; it does not produce a replacement save or retry the radio operation.
+Restart each command with its original config and data directory, then resume the pending trade on the 3DS. Bridges automatically exchange retained status again. A matching receipt from a completed Switch process releases the result automatically. A missing or mismatched record leaves the exchange uncertain; it does not produce a replacement save or retry the radio operation.
 
 If a bridge crashes after recording that it is launching the radio process, even before the process actually starts, recovery is deliberately uncertain. Inspect both consoles. Stop any surviving upstream process before reconciliation.
 
@@ -108,12 +105,11 @@ sh scripts/test-native.sh
 The adapter tests exercise the pinned engine without using a radio. They do not prove console timing. Before treating remote mode as supported, test:
 
 - Physical 3DS and Switch trades across separate networks, including the normal local workflow as a regression check.
-- Approval waits of 30, 120 and 300 seconds, followed by approval and decline.
-- Switch cancellation and reselection before approval; stale approval buttons must never authorize a replacement offer.
-- Internet loss before approval, immediately after approval and after the Switch saves.
+- Switch cancellation and reselection; each changed offer must be revalidated before automatic acceptance.
+- Internet loss before acceptance, immediately after commitment and after the Switch process completes.
 - Restart of each bridge and the relay at those boundaries; verify only one radio operation occurred.
 - Source-save change before result application, invalid receipts and unsupported Pokemon.
 
 The live process retains the existing 15-minute timeout. A timeout can leave an uncertain exchange and is not evidence that no trade occurred. This mode assumes cooperative friends and does not prevent save-backup duplication or promise atomic saving across consoles.
 
-Software validation on 16 September 2026: 47 tests ran on Windows, with the POSIX process-shutdown test skipped there and passing in the 13-test Linux service run. Native recovery/HTTP checks, native UI rendering, the CIA and 3DSX builds, browser rendering and Compose configuration validation passed. The Python wheel includes the browser page and sprite assets. Docker container execution was not tested because the Docker daemon was unavailable. No physical remote trade or public relay deployment was performed.
+Software validation on 16 September 2026 covers encrypted trusted-room exchange, identity pinning, automatic acceptance, recovery, native save/HTTP behavior, CIA and 3DSX builds, and Compose configuration. No physical remote trade across separate networks has completed validation yet.

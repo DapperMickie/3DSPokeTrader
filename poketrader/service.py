@@ -57,10 +57,8 @@ class Service:
             if hasattr(self.backend, "poll") and state["state"] in ("running", "remote_pair", "remote_offer", "uncertain"):
                 peer = self.backend.peer
                 if not peer.verified():
-                    phrase = peer.channel.phrase if peer.channel else ""
-                    state.update(state="remote_pair", revision=phrase,
-                        message=(f"Compare with your friend: {phrase}. A confirms a match."
-                                 if phrase else peer.error or "Waiting for pairing."))
+                    state.update(state="running", revision="",
+                                 message=peer.error or "Waiting for the trusted room peer.")
                 else:
                     state.update(self.backend.poll(directory, state["trainer_id"]))
                 write_json(directory / "state.json", state)
@@ -124,13 +122,19 @@ class Service:
                 from .save import evolution_target
                 if state.get("remote_room") != self.backend.peer.config["room"]:
                     raise Conflict("Restore the remote config for this exchange")
-                reserved = self.backend.peer.values()[0].get("reserved_id")
+                local, remote = self.backend.peer.values()
+                reserved = local.get("reserved_id")
                 if reserved not in (None, trade_id):
-                    raise Conflict("This room already has an exchange. Use a new room and data directory.")
+                    if not (local.get("applied") and remote.get("phase") == "saved"
+                            and remote.get("trade_id") == reserved):
+                        raise Conflict("This room still has an unfinished exchange.")
+                    self.backend.peer.update(trade_id=None, offer=None, companion=None,
+                        trainer_id=None, validated=None, approval=None, rejection=None,
+                        cancel=False, applied=False)
                 if evolution_target(Pokemon((self.directory(trade_id) / "offered.pk3").read_bytes())):
                     raise ValueError("Remote offers must not evolve by trade")
                 self.backend.peer.update(reserved_id=trade_id)
-                state.update(state="running", remote_room=self.backend.peer.config["room"], message="Pair the bridges before trading.")
+                state.update(state="running", remote_room=self.backend.peer.config["room"], message="Waiting for the trusted room peer.")
                 write_json(self.directory(trade_id) / "state.json", state)
                 return state
             state.update(state="running", message="On Switch: lead a Direct Corner trade, accept 3DSLINK, sit on the left.")

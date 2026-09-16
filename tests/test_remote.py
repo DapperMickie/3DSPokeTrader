@@ -1,6 +1,5 @@
 """Exercise encrypted peers through a real TLS relay and persisted crash recovery."""
 import datetime
-import http.client
 import ipaddress
 import json
 from pathlib import Path
@@ -24,7 +23,6 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from poketrader.remote_crypto import Channel, new_identity, public_key, encode
 from poketrader.relay import Relay
 from poketrader.remote import Peer, RemoteBackend, SwitchWorker, configure
-from poketrader.remote_ui import Controls
 from poketrader.__main__ import main
 from poketrader.service import Service, Conflict
 from poketrader.storage import write_json, read_json, atomic_write
@@ -140,8 +138,8 @@ class RemoteTests(unittest.TestCase):
 
     def pair(self):
         self.sync()
-        self.source.peer.verify(self.source.peer.channel.phrase)
-        self.worker.peer.verify(self.worker.peer.channel.phrase)
+        self.assertTrue(self.source.peer.verified())
+        self.assertTrue(self.worker.peer.verified())
         self.sync()
 
     def offer(self):
@@ -157,27 +155,18 @@ class RemoteTests(unittest.TestCase):
         self.worker.advance()
         self.sync()
         state = self.service.state(self.trade)
-        self.assertEqual(state["state"], "remote_offer")
         self.sync()
-        return state["revision"]
+        revision = self.worker.peer.values()[0]["proposal"]["revision"]
+        self.assertEqual(state["state"], "running")
+        self.assertEqual(self.source.peer.values()[0]["approval"], revision)
+        self.assertEqual(self.worker.peer.values()[0]["approval"], revision)
+        return revision
 
-    def test_full_exchange_requires_both_approvals_and_switch_save(self):
-        revision = self.offer()
-        self.worker.approve(revision)
-        self.worker.advance()
-        self.assertFalse((self.worker.directory/"gate-decision.json").exists())
-        self.service.remote_action(self.trade, "approve", revision)
-        self.sync()
+    def test_full_exchange_automatically_accepts_and_releases_verified_receipt(self):
+        self.offer()
         self.worker.advance()
         self.assertTrue(self.radio.finished.wait(3))
         self.worker.radio.join(3)
-        self.sync()
-        self.assertEqual(self.service.state(self.trade)["state"], "running")
-        with self.assertRaises(Conflict): self.service.result(self.trade)
-        self.source.stop()
-        self.source = ManualRemote(self.a, self.root/"source-peer")
-        self.service = Service(self.root/"saves", self.source)
-        self.worker.saved()
         self.sync()
         self.assertEqual(self.service.state(self.trade)["state"], "ready")
         self.assertEqual(Save(self.service.result(self.trade)).pokemon(0).species, 133)
@@ -186,6 +175,36 @@ class RemoteTests(unittest.TestCase):
         self.assertTrue(self.worker.peer.values()[1]["applied"])
         self.assertEqual(self.radio.calls, 1)
         self.assertNotIn("pokemon", json.dumps(self.relay.rooms))
+
+    def test_completed_room_is_reused_without_new_config_or_controls(self):
+        self.offer()
+        self.worker.advance()
+        self.assertTrue(self.radio.finished.wait(3))
+        self.worker.radio.join(3)
+        self.sync()
+        self.assertEqual(self.service.state(self.trade)["state"], "ready")
+        self.service.applied(self.trade)
+        self.sync()
+
+        next_trade = "c"*32
+        save_id, _ = self.service.upload(save())
+        self.service.prepare(next_trade, save_id, 0)
+        self.service.start(next_trade)
+        self.service.state(next_trade)
+        self.radio.finished.clear()
+        self.sync()
+        self.worker.advance()
+        deadline = time.monotonic()+3
+        while not (self.worker.directory/"gate-offer.json").exists():
+            if time.monotonic() > deadline: self.fail("Second exchange never offered")
+            time.sleep(.01)
+        self.worker.advance()
+        self.sync()
+        self.assertEqual(self.service.state(next_trade)["state"], "running")
+        self.sync()
+        self.worker.advance()
+        self.assertTrue(self.radio.finished.wait(3))
+        self.assertEqual(self.radio.calls, 2)
 
     def test_relay_restart_and_bridge_restart_do_not_relaunch(self):
         self.offer()
@@ -198,15 +217,15 @@ class RemoteTests(unittest.TestCase):
         self.assertEqual(self.worker.backend.calls, 0)
         self.assertEqual(self.service.state(self.trade)["state"], "uncertain")
 
-    def test_no_pokemon_payload_before_both_players_verify(self):
+    def test_no_pokemon_payload_before_the_room_peer_is_pinned(self):
         self.service.start(self.trade)
-        self.sync()
-        self.source.peer.verify(self.source.peer.channel.phrase)
-        self.sync()
-        self.assertEqual(self.service.state(self.trade)["state"], "remote_pair")
+        self.assertEqual(self.service.state(self.trade)["state"], "running")
         self.assertNotIn("offer", self.source.peer.values()[0])
         self.worker.advance()
         self.assertEqual(self.radio.calls, 0)
+        self.sync()
+        self.service.state(self.trade)
+        self.assertIn("offer", self.source.peer.values()[0])
 
     def test_replayed_snapshot_cannot_restore_old_approval(self):
         self.pair()
@@ -219,16 +238,14 @@ class RemoteTests(unittest.TestCase):
         self.source.peer.exchange()
         self.assertEqual(self.source.peer.values()[1]["approval"], "new-state")
 
-    def test_changed_offer_clears_approvals_and_old_button_rejected(self):
+    def test_changed_offer_is_revalidated_and_accepted_automatically(self):
         revision = self.offer()
-        self.service.remote_action(self.trade, "approve", revision)
-        self.worker.approve(revision)
         write_json(self.worker.directory/"gate-offer.json", dict(revision="offer-2", pokemon=encode(pokemon(133))))
         self.worker.advance()
         self.sync()
         self.service.state(self.trade)
-        self.assertIsNone(self.source.peer.values()[0]["approval"])
-        self.assertIsNone(self.worker.peer.values()[0]["approval"])
+        self.assertEqual(self.source.peer.values()[0]["approval"], "offer-2")
+        self.assertEqual(self.worker.peer.values()[0]["approval"], "offer-2")
         with self.assertRaises(Conflict): self.service.remote_action(self.trade, "approve", revision)
         self.assertFalse((self.worker.directory/"gate-decision.json").exists())
 
@@ -256,6 +273,12 @@ class RemoteTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             configure(self.root/"insecure.json", "http://127.0.0.1", "a"*32, "source")
         room = self.source.peer.config["room"]
+        intruder_config = self.root/"intruder.json"
+        configure(intruder_config, self.url, "a"*32, "switch", room)
+        intruder = Peer(intruder_config, self.root/"intruder-peer")
+        with self.assertRaises(HTTPError) as occupied:
+            intruder.exchange()
+        self.assertEqual(occupied.exception.code, 409)
         with self.relay.lock:
             self.relay.rooms[room]["switch"]["public"] = public_key(new_identity())
         with self.assertRaisesRegex(ValueError, "identity changed"):
@@ -274,7 +297,7 @@ class RemoteTests(unittest.TestCase):
             self.source.peer.exchange()
         self.assertEqual(seen["agent"], "PokeTrader-Bridge/0.2")
 
-    def test_browser_room_join_persists_and_cannot_abandon_verified_pairing(self):
+    def test_room_change_persists_and_cannot_abandon_pinned_pairing(self):
         new_room = "d"*32
         self.worker.join(new_room)
         self.assertEqual(read_json(self.b)["room"], new_room)
@@ -284,32 +307,5 @@ class RemoteTests(unittest.TestCase):
         self.assertEqual(self.worker.peer.config["room"], new_room)
         self.worker.peer.update(verified=True)
         with self.assertRaises(ValueError): self.worker.join("e"*32)
-
-    def test_browser_authentication_and_stale_room_actions(self):
-        controls = Controls(("127.0.0.1", 0), self.worker, "local-token")
-        thread = threading.Thread(target=controls.serve_forever, daemon=True)
-        thread.start()
-        try:
-            def call(method, path, value=None, token="local-token"):
-                conn = http.client.HTTPConnection(*controls.server_address, timeout=3)
-                conn.request(method, path, json.dumps(value) if value is not None else None,
-                    {"Authorization": "Bearer " + token, "Content-Type": "application/json"})
-                response = conn.getresponse()
-                result = response.status, response.read()
-                conn.close()
-                return result
-            self.assertEqual(call("GET", "/status", token="wrong")[0], 401)
-            status, body = call("GET", "/status")
-            self.assertEqual(status, 200)
-            self.assertNotIn(b"credential", body)
-            self.assertNotIn(b"private", body)
-            self.assertEqual(call("POST", "/cancel", {"room":"wrong"})[0], 409)
-            self.assertFalse(self.worker.peer.values()[0].get("cancel"))
-            self.assertEqual(call("POST", "/saved", {"room":self.worker.peer.config["room"]})[0], 409)
-        finally:
-            controls.shutdown()
-            controls.server_close()
-            thread.join()
-
 
 if __name__ == "__main__": unittest.main()

@@ -81,8 +81,10 @@ class Peer:
             return dict(self.state["local"]), dict(self.state["remote"])
 
     def verified(self):
-        local, remote = self.values()
-        return bool(local.get("verified") and remote.get("verified"))
+        # A private room has one relay-enforced slot per role. Once the peer's
+        # identity is pinned and the encrypted channel exists, no separate
+        # comparison ceremony is needed for this trusted self-hosted mode.
+        return self.channel is not None
 
     def verify(self, phrase):
         with self.lock:
@@ -116,6 +118,7 @@ class Peer:
                     self.channel = Channel(self.config["private"], result["public"],
                                            self.config["room"], self.config["role"])
                     self.state["public"] = result["public"]
+                    self.state["local"]["verified"] = True
                 envelope = result.get("envelope")
                 if envelope:
                     value = self.channel.open(envelope)
@@ -190,18 +193,15 @@ class RemoteBackend:
                 return {"state": "running", "message": f"Offer rejected: {exc}"}
             revision = proposal["revision"]
             if local.get("validated") != revision:
-                self.peer.update(validated=revision, approval=None, rejection=None)
+                self.peer.update(validated=revision, approval=revision, rejection=None)
             if remote.get("phase") == "offer":
-                from .service import trade_art
-                mon = Pokemon(incoming)
-                return dict(state="remote_offer", message="Approve this exact exchange. A changed offer clears approval.",
-                            received=mon.summary, received_art=trade_art(mon), revision=revision)
+                return {"state": "running", "message": "Switch offer validated and accepted automatically."}
         if remote.get("phase") == "saved":
             incoming = decode(remote["receipt"])
             if not proposal or incoming != decode(proposal["pokemon"]):
                 raise ValueError("Receipt differs from the approved Switch offer. Inspect both consoles.")
             atomic_write(directory / "received.pk3", incoming)
-            return {"state": "received", "message": "Switch player confirmed saving. Preparing verified save."}
+            return {"state": "received", "message": "Switch exchange completed. Preparing verified save."}
         return {"state": "running", "message": remote.get("message") or "Waiting for the Switch player."}
 
     def approve(self, revision):
@@ -273,8 +273,8 @@ class SwitchWorker:
             proposal = local.get("proposal")
             if not proposal or receipt != decode(proposal["pokemon"]):
                 raise ValueError("Receipt differs from approved offer")
-            self.peer.update(phase="receipt", receipt=encode(receipt),
-                             message="Confirm only after Switch saved and exited the room.")
+            self.peer.update(phase="saved", receipt=encode(receipt),
+                             message="Switch exchange completed with a verified receipt.")
         except (OSError, ValueError):
             self.peer.update(phase="uncertain", message=message)
 
@@ -290,10 +290,23 @@ class SwitchWorker:
         else:
             self._finish("Trade ended without a verified receipt. Inspect the Switch.")
 
+    def _reset_completed_exchange(self):
+        for name in ("gate-offer.json", "gate-decision.json", "gate-cancelled.json",
+                     "offered.pk3", "companion.pk3", "received.pk3"):
+            (self.directory / name).unlink(missing_ok=True)
+        self.peer.update(trade_id=None, launched=False, phase="waiting", source_offer=None,
+                         proposal=None, approval=None, cancel=False, commit_possible=False,
+                         receipt=None, message="Waiting for the next trusted-room exchange.")
+        self.radio = None
+
     def advance(self):
         local, remote = self.peer.values()
         if not self.peer.verified():
             return
+        if (local.get("phase") == "saved" and remote.get("trade_id")
+                and remote.get("trade_id") != local.get("trade_id")):
+            self._reset_completed_exchange()
+            local, remote = self.peer.values()
         if not local.get("launched") and remote.get("trade_id"):
             if local.get("trade_id") not in (None, remote["trade_id"]):
                 raise ValueError("Room belongs to another exchange")
@@ -326,7 +339,7 @@ class SwitchWorker:
             return
         proposal = read_json(proposal_path)
         if local.get("proposal") != proposal and not local.get("commit_possible"):
-            self.peer.update(proposal=proposal, approval=None, phase="offer")
+            self.peer.update(proposal=proposal, approval=proposal.get("revision"), phase="offer")
             local, remote = self.peer.values()
         revision = proposal["revision"]
         if proposal.get("cancelled"):

@@ -66,15 +66,16 @@ def main(argv=None):
     remote.add_argument("--role", choices=("source", "switch"), required=True)
     remote.add_argument("--room", help="Room code from the source player; Switch users can also join from the browser")
     remote.add_argument("--output", type=Path, required=True)
-    switch = sub.add_parser("remote-switch", help="Experimental Switch endpoint and local browser controls")
+    switch = sub.add_parser("remote-switch", help="Automated trusted-room Switch bridge")
     switch.add_argument("--remote", type=Path, required=True)
     switch.add_argument("--data", type=Path, default=Path("remote-switch-data"))
     switch.add_argument("--upstream", type=Path, required=True)
     switch.add_argument("--keys", type=Path, default=Path("~/.switch/prod.keys"))
     switch.add_argument("--phy", default="phy1")
     switch.add_argument("--python", default=sys.executable)
-    switch.add_argument("--bind", default="127.0.0.1", help="Use a private LAN IP to allow phone access")
-    switch.add_argument("--port", type=int, default=8766)
+    # Retained as ignored compatibility options for existing launch scripts.
+    switch.add_argument("--bind", default="127.0.0.1", help=argparse.SUPPRESS)
+    switch.add_argument("--port", type=int, default=8766, help=argparse.SUPPRESS)
     switch.add_argument("--experimental-remote", action="store_true", required=True)
     reconcile = sub.add_parser("remote-resolve-no-trade", help="Reconcile an uncertain remote exchange after checking both consoles")
     reconcile.add_argument("--remote", type=Path, required=True)
@@ -116,26 +117,16 @@ def main(argv=None):
                 peer.update(phase="cancelled", approval=None, message="Operator checked both consoles: no trade occurred.")
                 print("Recorded no trade. Restart the Switch bridge to notify the source bridge; use a new room for another exchange.")
         elif args.command == "remote-switch":
-            import threading
             from .remote import SwitchWorker
-            from .remote_ui import Controls
             with exclusive(args.data):
-                token_path = args.data / "control-token"
-                if not token_path.exists():
-                    atomic_write(token_path, secrets.token_hex(16).encode())
                 backend = LiveBackend(args.upstream, args.keys, args.phy, args.python)
                 backend.preflight()
                 worker = SwitchWorker(args.remote, args.data, backend)
-                server = Controls((args.bind, args.port), worker, token_path.read_text().strip())
-                thread = threading.Thread(target=worker.run, daemon=True)
-                thread.start()
-                print(f"Experimental controls: http://{args.bind}:{args.port}; local token is in {token_path}.", flush=True)
+                print(f"Trusted room {worker.peer.config['room']}: waiting for the 3DS bridge. No web controls are required.", flush=True)
                 try:
-                    server.serve_forever()
+                    worker.run()
                 finally:
-                    server.server_close()
                     worker.close()
-                    thread.join(10)
         elif args.command == "inspect":
             save = Save(args.save.read_bytes())
             print(f"FRLG | {save.trainer} | TID {save.trainer_id & 65535:05d}")

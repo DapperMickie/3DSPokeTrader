@@ -19,4 +19,4 @@ poke-trader = "poketrader.__main__:main"
 include = ["poketrader*"]
 
 [tool.setuptools.package-data]
-poketrader = ["species.json", "species-info.json", "remote.html", "art.bin"]
+poketrader = ["species.json", "species-info.json"]

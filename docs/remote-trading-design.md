@@ -1,6 +1,6 @@
 # Remote trading design interview
 
-The user confirmed shared understanding and authorized implementation on `codex/remote-trading-design`. See [setup and validation](remote-trading.md) for the experimental implementation.
+The user confirmed shared understanding and authorized implementation on `codex/remote-trading-design`. See [setup and validation](remote-trading.md) for the experimental implementation. The manual browser and approval design below was superseded by [ADR 0003](adr/0003-trusted-room-automation.md).
 
 ## Agreed user controls
 
