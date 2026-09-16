@@ -306,6 +306,9 @@ static void recover(Pending *p) {
             response_free(&r);
         }
         if(k&KEY_A && (!strcmp(state,"remote_pair") || !strcmp(state,"remote_offer"))) {
+            int pair=!strcmp(state,"remote_pair");
+            ui_status_frame("remote_sync",pair?"Confirming that both verification codes match...":"Approving this exact pair of offers...",received,mode,(unsigned)(osGetTime()-animation_start));
+            present();
             snprintf(path,sizeof(path),"/v1/trades/%s/%s",p->id,!strcmp(state,"remote_pair")?"verify":"approve");
             if(call("POST",path,revision,strlen(revision),&r)<0) { response_free(&r); message("Refresh exchange",error); continue; }
             response_free(&r);

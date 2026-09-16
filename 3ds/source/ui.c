@@ -187,10 +187,10 @@ void ui_status(const char *state,const char *detail,const char *received,const c
 }
 void ui_status_frame(const char *state,const char *detail,const char *received,const char *mode,unsigned elapsed_ms) {
     int prepared=!strcmp(state,"prepared"),done=!strcmp(state,"received"),running=!strcmp(state,"running");
-    int offer=!strcmp(state,"remote_offer"),pair=!strcmp(state,"remote_pair");
+    int offer=!strcmp(state,"remote_offer"),pair=!strcmp(state,"remote_pair"),syncing=!strcmp(state,"remote_sync");
     unsigned tick=elapsed_ms/80;
     base("03  /  TRADE & SAVE",mode); screen=&ui_top;
-    text(24,53,prepared?"READY TO LINK":done?"POKEMON RECEIVED!":offer?"REVIEW EXCHANGE":pair?"VERIFY YOUR FRIEND":running?"LINK EXCHANGE":"CHECK LINK STATUS",2,NAVY,355);
+    text(24,53,prepared?"READY TO LINK":done?"POKEMON RECEIVED!":offer?"REVIEW EXCHANGE":pair?"VERIFY YOUR FRIEND":syncing?"CONFIRMING...":running?"LINK EXCHANGE":"CHECK LINK STATUS",2,NAVY,355);
     card(23,80,112,103,0xD8E8F0u); card(265,80,112,103,done?MINT:0xD8E8F0u);
     int bob=running?(int)(tick%8<4?tick%4:3-tick%4):0;
     sprite(trade_dex[0],trade_shiny[0],31,83-bob,96);
@@ -211,13 +211,13 @@ void ui_status_frame(const char *state,const char *detail,const char *received,c
     } else text(148,147,done?"ARRIVED":"LINK CABLE",0,NAVY,110);
     text(42,185,"FROM YOUR SAVE",0,NAVY,135);
     text(270,185,done?"RECEIVED":offer?"OFFERED":"FROM SWITCH",0,NAVY,110);
-    screen=&ui_bottom; text(16,10,prepared?"Start your exchange":done?"Has the Switch saved?":offer?"Review this exchange":pair?"Verify your friend":running?"Trading with Switch":"Check both systems",2,NAVY,290);
+    screen=&ui_bottom; text(16,10,prepared?"Start your exchange":done?"Has the Switch saved?":offer?"Review this exchange":pair?"Verify your friend":syncing?"Contacting your bridge":running?"Trading with Switch":"Check both systems",2,NAVY,290);
     const char *body=prepared?"Open the local trade room on Switch. Offer a Pokemon that will not evolve. Use a Kanto return Pokemon until your source has the National Pokedex. No Eggs or held mail.":done?"Confirm only after the Switch has saved and left the trade room. Then we can update the save on your SD card.":detail;
     wrap(16,44,body,285,6,0,NAVY);
     card(12,156,296,42,CREAM);
     text(22,161,(done || offer)?received:running?"Waiting for the bridge receipt...":"Recovery record kept on SD card.",0,NAVY,274);
     text(22,177,mode && !strncmp(mode,"REMOTE",6)?"X: cancel / request recovery":done?"SD save awaits your confirmation.":"Your original save has a backup.",0,MUTED,274);
-    button(10,210,88,"B  Home",CREAM); button(108,210,202,prepared?"A  Start trade":done?"A  Switch saved":offer?"A  Approve offer":pair?"A  Codes match":"A  Refresh status",CORAL);
+    button(10,210,88,"B  Home",CREAM); button(108,210,202,syncing?"Please wait...":prepared?"A  Start trade":done?"A  Switch saved":offer?"A  Approve offer":pair?"A  Codes match":"A  Refresh status",CORAL);
 }
 void ui_message(const char *title,const char *body,int page) {
     base("POKETRADER  /  FRLG",NULL); screen=&ui_top;

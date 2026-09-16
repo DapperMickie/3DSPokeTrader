@@ -47,5 +47,6 @@ int main(void) {
     ui_trade_art("25\t0","133\t0");
     ui_status_frame("remote_pair","Compare with your friend: 1234-5678-9ABC-DEF0. A confirms a match.","","REMOTE EXPERIMENTAL",1200); capture("13-remote-pair");
     ui_status_frame("remote_offer","Approve this exact exchange. A changed offer clears approval.","EEVEE / FRIEND","REMOTE EXPERIMENTAL",1200); capture("14-remote-offer");
+    ui_status_frame("remote_sync","Confirming that both verification codes match...","","REMOTE EXPERIMENTAL",1200); capture("15-remote-sync");
     ui_close(); puts("UI parsing, hit targets and trade animation captures passed."); return 0;
 }
