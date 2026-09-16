@@ -24,13 +24,25 @@ int main(void) {
     int species[]={25,6,9,3,133,143,59,131,94,149,130,65,38,123,36,68,76,103,134,135,136,144,145,146};
     for(int i=1;i<24;i++) { mons[i]=mons[0]; mons[i].dex=species[i]; }
     ui_box(mons,0,0,"RED","live"); capture("02-pokemon-box");
+    ui_trade_art("25\t0","133\t0");
     ui_status("prepared","","","live"); capture("03-start-trade");
-    ui_status("received","","Eevee / Lv. 25","live"); capture("04-confirm-save");
+    ui_status_frame("received","","Eevee / Lv. 25","live",1200); capture("04-confirm-save");
     ui_status("uncertain","The connection ended before the bridge could confirm the result. Check the Switch and resolve this trade on the bridge before starting another.","","live"); capture("05-recovery");
     ui_message("Save updated","The received Pokemon is in the selected box slot.\n\nEmulator: load the in-game save, not an old state.\nVC export: import this save back into the title.\n\nBackups remain on your SD card.",0); capture("06-complete");
     ui_home(0,0,0,"Set up your bridge in Settings"); capture("07-home");
     ui_settings(0,"192.168.1.50",8765,1,"Not tested",0); capture("08-settings");
     ui_settings(3,"192.168.1.50",8765,1,"Bridge tested / LIVE",0); capture("09-connected");
     ui_home(0,1,1,"Bridge tested / LIVE"); capture("10-resume-home");
-    ui_close(); puts("UI parsing, hit targets and ten screen captures passed."); return 0;
+    ui_status_frame("running","On Switch: lead a Direct Corner trade, accept 3DSLINK, sit on the left.","","live",800); capture("11-trading");
+    unsigned char before[sizeof(ui_top.pixels)]; memcpy(before,ui_top.pixels,sizeof(before));
+    ui_status_frame("running","On Switch: lead a Direct Corner trade, accept 3DSLINK, sit on the left.","","live",1200);
+    assert(memcmp(before,ui_top.pixels,sizeof(before))!=0);
+    for(unsigned i=0;i<40;i++) {
+        char name[64]; snprintf(name,sizeof(name),"trade-frame-%02u",i);
+        ui_status_frame(i<20?"running":"received","On Switch: lead a Direct Corner trade, accept 3DSLINK, sit on the left.","Eevee / Lv. 25","live",i<20?i*80:(i-20)*80);
+        capture(name);
+    }
+    ui_trade_art("bad","999\t1");
+    ui_status_frame("received","","Unknown Pokemon","DEMO",1200); capture("12-trade-fallback");
+    ui_close(); puts("UI parsing, hit targets and trade animation captures passed."); return 0;
 }

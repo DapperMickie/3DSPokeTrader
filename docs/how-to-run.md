@@ -183,6 +183,12 @@ git push origin vX.Y.Z
 
 GitHub Actions runs the tests and 3DS build, packages the files, and publishes a GitHub release with generated notes. The release includes the CIA, 3DSX, SMDH, SD-card archive, source archive, and checksum manifest.
 
+## Trade screen
+
+The 3DS shows your offered Pokemon beside an animated link cable while the bridge runs the trade. When the bridge records a received Pokemon, its sprite appears with an arrival animation. Shiny Pokemon use shiny sprites. Update both the bridge and 3DS app to display the Pokemon; older bridge responses use Pokeballs.
+
+The animation follows bridge status, not individual frames on the Switch. Wi-Fi requests can briefly pause it. Confirm that the Switch has saved and left the trade room before pressing **A / Switch saved**.
+
 ## Current limits
 
 - Only standard 128 KiB FireRed and LeafGreen saves are accepted.

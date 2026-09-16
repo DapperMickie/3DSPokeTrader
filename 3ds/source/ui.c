@@ -173,17 +173,49 @@ void ui_box(const UiPokemon *mons,int box,int cursor,const char *trainer,const c
     }
     button(10,210,88,"B  Files",CREAM); button(108,210,202,p->eligible?"A  Select Pokemon":"Unavailable",p->eligible?CORAL:0xDCE5DCu);
 }
+static int trade_dex[2],trade_shiny[2];
+void ui_trade_art(const char *offered,const char *received) {
+    const char *values[]={offered,received};
+    for(int i=0;i<2;i++) {
+        int dex=0,shiny=0; char tail;
+        if(sscanf(values[i],"%d\t%d%c",&dex,&shiny,&tail)!=2 || dex<1 || dex>386 || shiny<0 || shiny>1) dex=shiny=0;
+        trade_dex[i]=dex; trade_shiny[i]=shiny;
+    }
+}
 void ui_status(const char *state,const char *detail,const char *received,const char *mode) {
+    ui_status_frame(state,detail,received,mode,0);
+}
+void ui_status_frame(const char *state,const char *detail,const char *received,const char *mode,unsigned elapsed_ms) {
     int prepared=!strcmp(state,"prepared"),done=!strcmp(state,"received"),running=!strcmp(state,"running");
+    unsigned tick=elapsed_ms/80;
     base("03  /  TRADE & SAVE",mode); screen=&ui_top;
-    text(24,56,prepared?"LINK TRADE":done?"TRADE COMPLETE?":running?"COMMUNICATING...":"CHECK LINK STATUS",3,NAVY,355);
-    for(int i=0;i<3;i++) { int x=70+i*130; card(x-25,103,50,48,i==2?CORAL:MINT); if(i<2) { rect(x+26,124,78,6,NAVY); rect(x+26,126,78,2,WHITE); } ball(x,127,12,0xE85848u); }
-    text(49,158,"3DS",1,NAVY,65); text(174,158,"Bridge",1,NAVY,70); text(307,158,"Switch",1,NAVY,74);
-    text(24,187,done?received:"Your original save has a backup.",1,NAVY,355);
-    screen=&ui_bottom; text(16,10,prepared?"Start your exchange":done?"Has the Switch saved?":"Recovery is available",2,NAVY,290);
+    text(24,53,prepared?"READY TO LINK":done?"POKEMON RECEIVED!":running?"LINK EXCHANGE":"CHECK LINK STATUS",2,NAVY,355);
+    card(23,80,112,103,0xD8E8F0u); card(265,80,112,103,done?MINT:0xD8E8F0u);
+    int bob=running?(int)(tick%8<4?tick%4:3-tick%4):0;
+    sprite(trade_dex[0],trade_shiny[0],31,83-bob,96);
+    if(done) {
+        /* Arrival grows into place once, then stays visible for confirmation. */
+        int size=elapsed_ms<640?32+(int)(elapsed_ms/10):96;
+        sprite(trade_dex[1],trade_shiny[1],321-size/2,131-size/2,size);
+        for(int i=0;i<4;i++) {
+            int x=276+i*28,y=88+(int)((tick+i*3)%5)*15;
+            if((tick+i)%3==0) { rect(x-3,y,7,1,WHITE); rect(x,y-3,1,7,WHITE); }
+        }
+    } else { ball(321,129,22,running?CORAL:MUTED); text(285,158,"Switch",0,NAVY,80); }
+    rect(138,121,124,12,NAVY); rect(138,125,124,4,WHITE);
+    if(running) {
+        int x=148+(int)(tick%20)*5;
+        ball(x,127,8,0xE85848u);
+        text(144,147,"LINK ACTIVE",0,NAVY,116);
+    } else text(148,147,done?"ARRIVED":"LINK CABLE",0,NAVY,110);
+    text(42,185,"FROM YOUR SAVE",0,NAVY,135);
+    text(270,185,done?"RECEIVED":"FROM SWITCH",0,NAVY,110);
+    screen=&ui_bottom; text(16,10,prepared?"Start your exchange":done?"Has the Switch saved?":running?"Trading with Switch":"Check both systems",2,NAVY,290);
     const char *body=prepared?"Open the local trade room on Switch. Offer a Pokemon that will not evolve. Use a Kanto return Pokemon until your source has the National Pokedex. No Eggs or held mail.":done?"Confirm only after the Switch has saved and left the trade room. Then we can update the save on your SD card.":detail;
     wrap(16,44,body,285,6,0,NAVY);
-    card(12,156,296,42,CREAM); text(22,161,"Safe to leave this screen",0,NAVY,274); text(22,177,"Recovery record kept on SD card.",0,MUTED,274);
+    card(12,156,296,42,CREAM);
+    text(22,161,done?received:running?"Waiting for the bridge receipt...":"Recovery record kept on SD card.",0,NAVY,274);
+    text(22,177,done?"SD save awaits your confirmation.":"Your original save has a backup.",0,MUTED,274);
     button(10,210,88,"B  Home",CREAM); button(108,210,202,prepared?"A  Start trade":done?"A  Switch saved":"A  Refresh status",CORAL);
 }
 void ui_message(const char *title,const char *body,int page) {

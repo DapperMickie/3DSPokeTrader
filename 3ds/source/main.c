@@ -246,7 +246,8 @@ static int select_pokemon(const char *save_id,const char *trainer,const char *mo
 }
 
 static void recover(Pending *p) {
-    char path[128];
+    char path[128],previous_state[32]="";
+    u64 animation_start=osGetTime();
     while(!exiting) {
         Response r;
         snprintf(path,sizeof(path),"/v1/trades/%s",p->id);
@@ -264,7 +265,11 @@ static void recover(Pending *p) {
         char state[32],detail[512],received[128],mode[80],result_hash[65];
         field(&r,0,state,sizeof(state)); field(&r,1,detail,sizeof(detail));
         field(&r,2,received,sizeof(received)); field(&r,3,mode,sizeof(mode));
-        field(&r,4,result_hash,sizeof(result_hash)); response_free(&r);
+        field(&r,4,result_hash,sizeof(result_hash));
+        char offered_art[32],received_art[32];
+        field(&r,5,offered_art,sizeof(offered_art)); field(&r,6,received_art,sizeof(received_art));
+        ui_trade_art(offered_art,received_art); response_free(&r);
+        if(strcmp(previous_state,state)) { strcpy(previous_state,state); animation_start=osGetTime(); }
         if(!strcmp(state,"ready") || !strcmp(state,"applied")) {
             ui_message("Applying verified save","Keep the app open. Previous save and backup are retained.",0); present();
             snprintf(path,sizeof(path),"/v1/trades/%s/result",p->id);
@@ -284,12 +289,13 @@ static void recover(Pending *p) {
             return;
         }
         if(!strcmp(state,"cancelled")) { remove(PENDING_PATH); message("Cancelled","The bridge operator confirmed that no trade occurred."); return; }
-        ui_status(state,detail,received,mode); present();
         unsigned k=0;
-        if(!strcmp(state,"running")) {
-            /* Poll every two seconds, while keeping exit responsive. */
-            for(int frame=0;frame<120 && !(k&(KEY_A|KEY_B|KEY_START|KEY_TOUCH));frame++) k=buttons();
-        } else k=wait_buttons();
+        u64 poll_start=osGetTime();
+        do {
+            ui_status_frame(state,detail,received,mode,(unsigned)(osGetTime()-animation_start)); present();
+            k=buttons();
+        } while(!exiting && !(k&(KEY_A|KEY_B|KEY_START|KEY_TOUCH)) &&
+                (strcmp(state,"running") || osGetTime()-poll_start<2000));
         if(k&KEY_TOUCH) { touchPosition t; hidTouchRead(&t); if(t.py>=210) k|=t.px<103?KEY_B:KEY_A; }
         if(k&KEY_START) { exiting=1; return; }
         if(k&KEY_B) return;

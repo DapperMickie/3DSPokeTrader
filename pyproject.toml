@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "poke-trader-bridge"
-version = "0.2.2"
+version = "0.2.3"
 description = "FRLG save exchange bridge for a homebrew 3DS and a retail Switch"
 requires-python = ">=3.12"
 license = "AGPL-3.0-or-later"

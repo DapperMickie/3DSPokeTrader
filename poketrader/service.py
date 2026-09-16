@@ -9,6 +9,14 @@ import threading
 from .save import Save, Pokemon, SaveError
 from .storage import atomic_write, write_json, read_json
 
+def trade_art(mon):
+    """Presentation only; the original PK3 remains the trade payload."""
+    pid = int.from_bytes(mon.pk3[:4], "little")
+    ot = int.from_bytes(mon.pk3[4:8], "little")
+    shiny = ((pid >> 16) ^ (pid & 65535) ^ (ot >> 16) ^ (ot & 65535)) < 8
+    return f"{mon.dex}\t{int(shiny)}"
+
+
 ID = re.compile(r"^[0-9a-f]{32}$")
 BLOCKING = {"running", "uncertain", "received", "import_blocked"}
 
@@ -79,7 +87,8 @@ class Service:
             atomic_write(directory / "companion.pk3", companion.pk3)
             state = dict(id=trade_id, save_id=save_id, index=index, state="prepared",
                          mode=self.backend.label, message="Ready. Offer a non-evolving Pokemon without mail or an Egg on Switch.",
-                         offered=offered.summary, received="", trainer_id=save.trainer_id)
+                         offered=offered.summary, received="", trainer_id=save.trainer_id,
+                         offered_art=trade_art(offered))
             write_json(path, state)
             return state
 
@@ -127,7 +136,7 @@ class Service:
         try:
             data = (directory / "received.pk3").read_bytes()
             mon = Pokemon(data)
-            state.update(state="received", received=mon.summary,
+            state.update(state="received", received=mon.summary, received_art=trade_art(mon),
                          message="Confirm only after the Switch shows the received Pokemon and has saved. Exit the trading room first.")
         except (FileNotFoundError, SaveError):
             state.update(state="uncertain", message=message+" No valid receipt. Do not repeat the trade; inspect both sides.")

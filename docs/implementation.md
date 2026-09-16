@@ -2,7 +2,7 @@
 
 ## Components
 
-`3ds/source/main.c` implements a console-based 3DS interface with a file picker, 14-box browser, trade status, and recovery. `http.c`, `hash.c`, and `files.c` compile both for ARM11 and native Linux, so their networking and file-write code can be tested outside the console.
+`3ds/source/main.c` implements a graphical 3DS interface with a file picker, 14-box browser, trade status, and recovery. `http.c`, `hash.c`, and `files.c` compile both for ARM11 and native Linux, so their networking and file-write code can be tested outside the console.
 
 `poketrader/save.py` reads and writes saves. The bridge owns this parsing code; the 3DS uploads a copy and only installs a complete, hash-verified result. `service.py` owns transaction state; `server.py` exposes the authenticated LAN protocol. `backend.py` launches one pinned upstream trade process. `upstream_runner.py` adapts its persistence and Pokemon input format without altering its radio state machine.
 
@@ -77,6 +77,6 @@ All requests require `Authorization: Bearer <32 hexadecimal characters>` and a b
 | `GET /v1/trades/<id>/result` | Verified raw result save |
 | `POST /v1/trades/<id>/applied` | Client acknowledges local replacement |
 
-State responses contain five lines, including empty fields: state, message, received summary, backend mode, result SHA-256. Filenames supplied by a client never become server filesystem paths. Only checked IDs select server-owned paths.
+State responses contain seven lines, including empty fields: state, message, received summary, backend mode, result SHA-256, offered art, received art. Each art field contains a National Dex number and shiny flag separated by a tab. The first five fields remain compatible with older clients. Missing art in older bridge responses or transactions uses a generic Pokeball. The client animates the active link while running and reveals the incoming sprite only after a received state. It polls every two seconds; this is not synchronized with individual Switch animation frames. Synchronous HTTP requests can pause the animation while the bridge responds. Filenames supplied by a client never become server filesystem paths. Only checked IDs select server-owned paths.
 
 The CLI exclusively locks its data directory. Manual resolution requires stopping the service first. An unexpected server termination may leave a child trade process alive; inspect and stop it before operator reconciliation. The bridge must not be exposed beyond a trusted LAN.

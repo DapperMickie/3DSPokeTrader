@@ -11,6 +11,8 @@ int ui_parse_pokemon(const char *line, UiPokemon *p);
 void ui_browser(const char *path,const UiEntry *entries,int count,int cursor);
 void ui_box(const UiPokemon *mons,int box,int cursor,const char *trainer,const char *mode);
 void ui_status(const char *state,const char *detail,const char *received,const char *mode);
+void ui_trade_art(const char *offered,const char *received);
+void ui_status_frame(const char *state,const char *detail,const char *received,const char *mode,unsigned elapsed_ms);
 void ui_message(const char *title,const char *body,int page);
 void ui_home(int cursor,int pending,int configured,const char *connection);
 void ui_settings(int cursor,const char *host,int port,int has_token,const char *connection,int locked);

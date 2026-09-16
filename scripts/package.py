@@ -61,7 +61,7 @@ for directory in ("poketrader","3ds","scripts","tests","docs",".github"):
     for path in (ROOT/directory).rglob("*"):
         if not path.is_file() or "__pycache__" in path.parts or "build" in path.parts:
             continue
-        if path.suffix in (".py",".c",".h",".json",".md",".sh",".yml",".bin",".txt",".png",".rsf") or path.name=="Makefile":
+        if path.suffix in (".py",".c",".h",".json",".md",".sh",".yml",".bin",".txt",".png",".gif",".rsf") or path.name=="Makefile":
             source_files.append(path)
 source_zip = out/f"PokeTrader-source-v{version}.zip"
 with zipfile.ZipFile(source_zip,"w",zipfile.ZIP_DEFLATED) as archive:

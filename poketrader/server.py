@@ -18,7 +18,8 @@ def lines(*values):
 
 def state_body(state):
     return lines(state["state"], state["message"], state["received"], state["mode"],
-                 state.get("result_sha256", ""))
+                 state.get("result_sha256", ""), state.get("offered_art", ""),
+                 state.get("received_art", ""))
 
 
 class Server(ThreadingHTTPServer):

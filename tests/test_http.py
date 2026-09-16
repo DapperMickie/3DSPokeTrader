@@ -37,8 +37,12 @@ class HttpTests(unittest.TestCase):
         trade_id="c"*32; base="/v1/trades/"+trade_id
         code,body=self.request("PUT",base,f"{save_id}\n0\n".encode())
         self.assertEqual(code,200); self.assertIn(b"DEMO - NO SWITCH TRADE",body)
+        fields=body.decode().splitlines()
+        self.assertEqual(fields[5].split("\t")[0], "25")
         self.assertEqual(self.request("POST",base+"/start")[0],200)
         for thread in self.service.threads: thread.join(5)
+        code,body=self.request("GET",base)
+        self.assertEqual(body.decode().splitlines()[6].split("\t")[0], "133")
         code,body=self.request("POST",base+"/confirm")
         self.assertEqual(code,200); self.assertTrue(body.startswith(b"ready\n"))
         code,body=self.request("GET",base+"/result")
