@@ -261,6 +261,19 @@ class RemoteTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "identity changed"):
             self.source.peer.exchange()
 
+    def test_bridge_sends_an_explicit_user_agent(self):
+        seen = {}
+        class Response:
+            def __enter__(self): return self
+            def __exit__(self, *_): pass
+            def read(self, _limit): return b'{}'
+        def capture(request, **_):
+            seen["agent"] = request.get_header("User-agent")
+            return Response()
+        with patch("poketrader.remote.urlopen", capture):
+            self.source.peer.exchange()
+        self.assertEqual(seen["agent"], "PokeTrader-Bridge/0.2")
+
     def test_browser_room_join_persists_and_cannot_abandon_verified_pairing(self):
         new_room = "d"*32
         self.worker.join(new_room)

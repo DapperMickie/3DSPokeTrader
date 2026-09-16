@@ -101,7 +101,8 @@ class Peer:
                         lease=self.config["lease"], envelope=envelope)
         request = Request(self.config["relay"] + "/v1/exchange",
             data=json.dumps(body).encode(), headers={"Content-Type": "application/json",
-            "Authorization": "Bearer " + self.config["credential"]})
+            "Authorization": "Bearer " + self.config["credential"],
+            "User-Agent": "PokeTrader-Bridge/0.2"})
         with urlopen(request, timeout=8) as response:
             data = response.read(16385)
             if len(data) > 16384:
