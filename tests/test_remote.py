@@ -25,6 +25,7 @@ from poketrader.remote_crypto import Channel, new_identity, public_key, encode
 from poketrader.relay import Relay
 from poketrader.remote import Peer, RemoteBackend, SwitchWorker, configure
 from poketrader.remote_ui import Controls
+from poketrader.__main__ import main
 from poketrader.service import Service, Conflict
 from poketrader.storage import write_json, read_json, atomic_write
 from poketrader.save import Save
@@ -44,6 +45,17 @@ class CryptoTests(unittest.TestCase):
         with self.assertRaises(InvalidTag): switch.open(dict(message, sequence=2))
         other_room = Channel(b, public_key(a), "other", "switch")
         with self.assertRaises(InvalidTag): other_room.open(message)
+
+    def test_relay_command_generates_credential_on_first_start(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary)/"relay-credential"
+            class StopServer:
+                def __init__(self, _address, credential): self.credential = credential
+                def serve_forever(self): raise KeyboardInterrupt
+                def server_close(self): pass
+            with patch("poketrader.relay.Relay", StopServer):
+                self.assertEqual(main(["relay", "--credential-file", str(path)]), 130)
+            self.assertEqual(len(path.read_text()), 64)
 
 
 class ManualRemote(RemoteBackend):

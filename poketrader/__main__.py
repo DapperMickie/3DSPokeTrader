@@ -57,7 +57,7 @@ def main(argv=None):
     resolve.add_argument("--data", type=Path, default=Path("bridge-data"))
     resolve.add_argument("--neither-side-traded", action="store_true", required=True)
     relay = sub.add_parser("relay", help="Run the optional self-hosted relay behind HTTPS")
-    relay.add_argument("--credential-file", type=Path, required=True)
+    relay.add_argument("--credential-file", type=Path, default=Path("relay-data/relay-credential"))
     relay.add_argument("--bind", default="127.0.0.1")
     relay.add_argument("--port", type=int, default=8780)
     remote = sub.add_parser("remote-config", help="Create a private room config for one exchange")
@@ -84,6 +84,13 @@ def main(argv=None):
     try:
         if args.command == "relay":
             from .relay import Relay
+            if not args.credential_file.exists():
+                atomic_write(args.credential_file, secrets.token_hex(32).encode())
+                try:
+                    args.credential_file.chmod(0o600)
+                except OSError:
+                    pass
+                print(f"Generated relay credential in {args.credential_file}.", flush=True)
             server = Relay((args.bind, args.port), args.credential_file.read_text().strip())
             print(f"Relay listening on {args.bind}:{args.port}; HTTPS reverse proxy required.", flush=True)
             try:

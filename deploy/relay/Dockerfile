@@ -5,4 +5,4 @@ COPY poketrader ./poketrader
 RUN pip install --no-cache-dir .
 USER 65532:65532
 EXPOSE 8780
-CMD ["poke-trader", "relay", "--bind", "0.0.0.0", "--credential-file", "/run/secrets/relay_credential"]
+CMD ["poke-trader", "relay", "--bind", "0.0.0.0", "--credential-file", "/data/relay-credential"]
