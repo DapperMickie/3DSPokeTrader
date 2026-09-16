@@ -21,7 +21,7 @@ The relay forwards encrypted snapshots and stores no durable trade records. It l
 
 For an existing HTTPS reverse proxy, run `poke-trader relay --credential-file relay-credential` on loopback port 8780 and proxy `/v1/exchange` to it. Relay redirects are rejected by clients. The bridges verify the relay's TLS certificate using the operating system trust store.
 
-The Portainer deployment in `deploy/relay/portainer-compose.yml` builds from this repository and joins the existing `robsengamingproxy` network as `pokerelay:8780`. It generates a 64-character relay credential in its persistent `relay_data` volume on first startup. Read that credential once from the container, store it on both bridges, and keep it private.
+The Portainer deployment in `deploy/relay/portainer-compose.yml` builds from this repository and joins the existing `robsengamingproxy` network as `pokerelay:8780`. It generates a 64-character relay credential in its persistent `relay_data` volume on first startup. Read that credential once from the container, store it on both bridges, and keep it private. The process starts as root solely to initialize and write that Docker-managed volume; its root filesystem is read-only, all Linux capabilities are dropped, and privilege escalation is disabled.
 
 ## Configure the bridges
 
