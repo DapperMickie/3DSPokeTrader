@@ -1,5 +1,7 @@
 name: Check and build
 on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -26,3 +28,36 @@ jobs:
             3ds/PokeTrader.3dsx
             3ds/PokeTrader.cia
             3ds/PokeTrader.smdh
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [test, build-3ds]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: PokeTrader-3ds
+          path: 3ds
+      - name: Package release
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: python scripts/package.py --binaries 3ds --version "${RELEASE_TAG#v}"
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --verify-tag \
+            --generate-notes \
+            --title "PokeTrader $GITHUB_REF_NAME" \
+            3ds/PokeTrader.3dsx \
+            3ds/PokeTrader.cia \
+            3ds/PokeTrader.smdh \
+            dist/PokeTrader-3ds-*.zip \
+            dist/PokeTrader-source-*.zip \
+            dist/build-info.json
