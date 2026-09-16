@@ -16,6 +16,8 @@ jobs:
       image: devkitpro/devkitarm@sha256:15b79ce75822c289538d8153da5fa7aafe5e6adc32ad8a575a197beca0f0761b
     steps:
       - uses: actions/checkout@v4
+      - name: Install makerom
+        run: sh scripts/install-makerom.sh /opt/devkitpro/tools/bin
       - run: make -C 3ds
       - uses: actions/upload-artifact@v4
         with:

@@ -71,6 +71,8 @@ Checks completed:
 - Channel selection worked after bringing the unused managed interface down.
 - The actual LDN 0.0.17 library created and activated a monitor interface and
   selected channel 1.
+- The bridge wrapper extends each LDN channel scan to two seconds. The upstream
+  110 ms default repeatedly missed Switch advertisements through USB/IP.
 - All 30 bridge tests passed under WSL Python 3.12.12.
 - Pinned upstream CLI, 48 record loads, party stats and receipt callback passed.
 

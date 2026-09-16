@@ -33,8 +33,7 @@ $(TARGET).3dsx: $(TARGET).elf $(TARGET).smdh $(wildcard romfs/ui/*)
 # from the ELF rather than by renaming/converting the 3DSX.
 $(TARGET).cia: $(TARGET).elf $(TARGET).smdh cia.rsf $(wildcard romfs/ui/*)
 	makerom -f cia -o $@ -target t -exefslogo -elf $(TARGET).elf \
-		-rsf cia.rsf -icon $(TARGET).smdh \
-		-romfs romfs
+		-rsf cia.rsf -icon $(TARGET).smdh
 
 clean:
 	rm -rf build $(TARGET).elf $(TARGET).map $(TARGET).3dsx $(TARGET).smdh $(TARGET).cia

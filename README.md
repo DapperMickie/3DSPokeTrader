@@ -69,8 +69,11 @@ The prebuilt SD-card archive is `dist/PokeTrader-3ds-v0.2.2.zip`. Extract its `3
 Build with [devkitPro's 3DS toolchain](https://devkitpro.org/wiki/Getting_Started):
 
 ```sh
+sudo sh scripts/install-makerom.sh /usr/local/bin
 make -C 3ds
 ```
+
+The installer pins and verifies Project CTR `makerom` 0.18.4, which is required for the CIA target but is not included in the devkitPro container.
 
 Copy `3ds/PokeTrader.3dsx` and `3ds/PokeTrader.smdh` into `sdmc:/3ds/PokeTrader/` to launch it from Homebrew Launcher, or copy `3ds/PokeTrader.cia` to the SD card and install it with FBI to place PokeTrader on the HOME Menu.
 

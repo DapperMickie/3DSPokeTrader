@@ -49,6 +49,17 @@ def install_party_loader(module):
     module.runtime.load_party = load_party
 
 
+def install_scan_dwell(ldn_module, seconds=2.0):
+    """Give USB/IP radios enough time to receive an LDN action frame."""
+    original = ldn_module.scan
+
+    async def scan(*args, **kwargs):
+        kwargs.setdefault("dwell_time", seconds)
+        return await original(*args, **kwargs)
+
+    ldn_module.scan = scan
+
+
 def main():
     upstream = Path(sys.argv[1]).resolve()
     sys.path.insert(0, str(upstream))
@@ -56,6 +67,8 @@ def main():
     parser = module.build_parser()
     args = parser.parse_args(sys.argv[2:])
     config = module._build_run_config(parser, args)
+    import ldn
+    install_scan_dwell(ldn)
     install_commit_writer(module, config)
     install_party_loader(module)
     return module.main(sys.argv[2:])

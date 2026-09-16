@@ -1,6 +1,8 @@
 *
 !3ds/
 !3ds/**
+!scripts/
+!scripts/install-makerom.sh
 !Dockerfile.build
 3ds/build/
 3ds/*.elf
