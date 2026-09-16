@@ -14,7 +14,7 @@ See [How to run PokeTrader](docs/how-to-run.md) for installation, setup, trading
 
 ## Current status
 
-PokeTrader is still a hardware-test build. Save handling, recovery, and communication between the app and bridge have automated tests, but a complete physical 3DS-to-Switch trade has not yet been confirmed.
+PokeTrader is still a hardware-test build. Save handling, recovery, and communication between the app and bridge have automated tests, but only a hand full of complete physical 3DS-to-Switch trades have been confirmed.
 
 It supports standard FireRed and LeafGreen saves. ROM hacks, save states, other Pokemon generations, eggs, held mail, and selecting Pokemon directly from the party are not supported.
 
