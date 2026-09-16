@@ -18,7 +18,7 @@ def trade_art(mon):
 
 
 ID = re.compile(r"^[0-9a-f]{32}$")
-BLOCKING = {"running", "uncertain", "received", "import_blocked"}
+BLOCKING = {"running", "uncertain", "received", "import_blocked", "remote_pair", "remote_offer"}
 
 
 class Conflict(ValueError):
@@ -43,7 +43,7 @@ class Service:
         self.closing = False
         for path in (self.root / "trades").glob("*/state.json"):
             state = read_json(path)
-            if state["state"] == "running":
+            if state["state"] == "running" and not state.get("mode", "").startswith("REMOTE"):
                 # Never relaunch a trade after restart. A receipt can still be confirmed.
                 self._finish(path.parent, state, "Bridge restarted during trading.")
 
@@ -52,7 +52,19 @@ class Service:
 
     def state(self, trade_id):
         with self.lock:
-            return read_json(self.directory(trade_id) / "state.json")
+            directory = self.directory(trade_id)
+            state = read_json(directory / "state.json")
+            if hasattr(self.backend, "poll") and state["state"] in ("running", "remote_pair", "remote_offer", "uncertain"):
+                peer = self.backend.peer
+                if not peer.verified():
+                    state.update(state="running", revision="",
+                                 message=peer.error or "Waiting for the trusted room peer.")
+                else:
+                    state.update(self.backend.poll(directory, state["trainer_id"]))
+                write_json(directory / "state.json", state)
+                if state["state"] == "received":
+                    return self.confirm(trade_id)
+            return state
 
     def save(self, save_id):
         return Save((self.root / "saves" / (identifier(save_id)+".sav")).read_bytes())
@@ -85,10 +97,17 @@ class Service:
             atomic_write(directory / "original.sav", save.data)
             atomic_write(directory / "offered.pk3", offered.pk3)
             atomic_write(directory / "companion.pk3", companion.pk3)
+            remote_pair = (hasattr(self.backend, "peer")
+                           and self.backend.peer.config["role"] in ("source-a", "source-b"))
+            message = ("Ready to exchange this selection with the other 3DS."
+                       if remote_pair else
+                       "Ready. Offer a non-evolving Pokemon without mail or an Egg on Switch.")
             state = dict(id=trade_id, save_id=save_id, index=index, state="prepared",
-                         mode=self.backend.label, message="Ready. Offer a non-evolving Pokemon without mail or an Egg on Switch.",
+                         mode=self.backend.label, message=message,
                          offered=offered.summary, received="", trainer_id=save.trainer_id,
                          offered_art=trade_art(offered))
+            if hasattr(self.backend, "peer"):
+                state["remote_room"] = self.backend.peer.config["room"]
             write_json(path, state)
             return state
 
@@ -104,6 +123,28 @@ class Service:
                 if other["id"] != trade_id and other["state"] in BLOCKING:
                     raise Conflict(f"Resolve transaction {other['id']} before another trade.")
             self.backend.preflight()
+            if hasattr(self.backend, "poll"):
+                from .save import evolution_target
+                if state.get("remote_room") != self.backend.peer.config["room"]:
+                    raise Conflict("Restore the remote config for this exchange")
+                local, remote = self.backend.peer.values()
+                reserved = local.get("reserved_id")
+                if hasattr(self.backend, "reserve"):
+                    self.backend.reserve(trade_id)
+                else:
+                    if reserved not in (None, trade_id):
+                        if not (local.get("applied") and remote.get("phase") == "saved"
+                                and remote.get("trade_id") == reserved):
+                            raise Conflict("This room still has an unfinished exchange.")
+                        self.backend.peer.update(trade_id=None, offer=None, companion=None,
+                            trainer_id=None, validated=None, approval=None, rejection=None,
+                            cancel=False, applied=False)
+                if evolution_target(Pokemon((self.directory(trade_id) / "offered.pk3").read_bytes())):
+                    raise ValueError("Remote offers must not evolve by trade")
+                self.backend.peer.update(reserved_id=trade_id)
+                state.update(state="running", remote_room=self.backend.peer.config["room"], message="Waiting for the trusted room peer.")
+                write_json(self.directory(trade_id) / "state.json", state)
+                return state
             state.update(state="running", message="On Switch: lead a Direct Corner trade, accept 3DSLINK, sit on the left.")
             write_json(self.directory(trade_id) / "state.json", state)
             thread = threading.Thread(target=self._run, args=(trade_id,), daemon=True)
@@ -181,12 +222,40 @@ class Service:
                 raise Conflict("There is no confirmed result to acknowledge.")
             state.update(state="applied", message="Save replacement acknowledged by the client.")
             write_json(self.directory(trade_id) / "state.json", state)
+            if hasattr(self.backend, "peer") and state.get("remote_room") == self.backend.peer.config["room"]:
+                self.backend.peer.update(applied=True)
             return state
+
+    def remote_action(self, trade_id, action, revision):
+        with self.lock:
+            if not hasattr(self.backend, "peer"):
+                raise Conflict("Remote trading is not enabled")
+            state = self.state(trade_id)
+            if action == "verify":
+                if state["state"] != "remote_pair":
+                    raise Conflict("Pairing is not awaiting confirmation")
+                self.backend.peer.verify(revision)
+            elif action == "approve":
+                if state["state"] != "remote_offer" or state.get("revision") != revision:
+                    raise Conflict("Offer changed. Refresh before approving")
+                self.backend.approve(revision)
+            elif action == "cancel":
+                if state["state"] not in ("prepared", "running", "remote_pair", "remote_offer", "uncertain"):
+                    raise Conflict("This exchange is no longer cancellable")
+                self.backend.cancel()
+                if not self.backend.peer.values()[0].get("trade_id"):
+                    state.update(state="cancelled", message="Cancelled before any offer was sent.")
+                    write_json(self.directory(trade_id) / "state.json", state)
+            else:
+                raise ValueError("Unknown remote action")
+            return self.state(trade_id)
 
     def resolve_no_trade(self, trade_id):
         """Local CLI only; operator must check that neither side traded."""
         with self.lock:
             state = self.state(trade_id)
+            if state.get("mode", "").startswith("REMOTE"):
+                raise Conflict("Reconcile remote trades on the Switch bridge with remote-resolve-no-trade")
             if state["state"] not in ("uncertain", "prepared"):
                 raise Conflict("Only a prepared or uncertain transaction can be marked as not traded.")
             state.update(state="cancelled", message="Operator confirmed no trade occurred.")

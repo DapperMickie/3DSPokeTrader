@@ -1,0 +1,7 @@
+*
+!pyproject.toml
+!LICENSE
+!README.md
+!poketrader/
+!poketrader/**
+poketrader/__pycache__/

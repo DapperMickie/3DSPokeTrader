@@ -10,7 +10,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - run: python -m pip install '.[remote]'
+      - name: Fetch pinned upstream for approval adapter tests
+        run: |
+          git clone https://github.com/tornadus/frlg-ldn-trade.git .reference/upstream
+          git -C .reference/upstream checkout 13809c21b6e992097f98453b7cbc9e2bc30bbf7c
       - run: python -m unittest discover -v
+        env:
+          POKETRADER_TEST_UPSTREAM: .reference/upstream
       - run: sh scripts/test-native.sh
   build-3ds:
     runs-on: ubuntu-latest

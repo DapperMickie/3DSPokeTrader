@@ -19,7 +19,7 @@ def lines(*values):
 def state_body(state):
     return lines(state["state"], state["message"], state["received"], state["mode"],
                  state.get("result_sha256", ""), state.get("offered_art", ""),
-                 state.get("received_art", ""))
+                 state.get("received_art", ""), state.get("revision", ""))
 
 
 class Server(ThreadingHTTPServer):
@@ -105,6 +105,9 @@ class Handler(BaseHTTPRequestHandler):
                         raise ValueError("This request does not accept a body.")
                     operation = {"start": service.start, "confirm": service.confirm, "applied": service.applied}[path[3]]
                     self.respond(200, state_body(operation(trade_id)))
+                elif method == "POST" and path[3:] in (["verify"], ["approve"], ["cancel"]):
+                    self.respond(200, state_body(service.remote_action(
+                        trade_id, path[3], body.decode("ascii"))))
                 else:
                     self.respond(404, lines("Unknown endpoint."))
             else:

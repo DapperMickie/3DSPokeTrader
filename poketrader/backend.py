@@ -63,6 +63,10 @@ class LiveBackend:
         env = os.environ.copy()
         project = str(Path(__file__).resolve().parent.parent)
         env["PYTHONPATH"] = project + os.pathsep + env.get("PYTHONPATH", "")
+        if getattr(self, "remote_gate", False):
+            env["POKETRADER_REMOTE_GATE"] = str(directory.resolve())
+        else:
+            env.pop("POKETRADER_REMOTE_GATE", None)
         with (directory / "trade.log").open("wb") as log:
             with self.process_lock:
                 if self.stopping.is_set():
