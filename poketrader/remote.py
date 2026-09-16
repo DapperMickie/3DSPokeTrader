@@ -179,6 +179,7 @@ class RemoteBackend:
         if remote.get("phase") == "uncertain":
             return {"state": "uncertain", "message": "Inspect the Switch. No automatic repeat is allowed."}
         proposal = remote.get("proposal")
+        preview = {}
         if proposal and proposal.get("cancelled"):
             self.peer.update(validated=None, approval=None)
             return {"state": "running", "message": "Switch selection cancelled. Waiting for a new offer."}
@@ -194,15 +195,23 @@ class RemoteBackend:
             revision = proposal["revision"]
             if local.get("validated") != revision:
                 self.peer.update(validated=revision, approval=revision, rejection=None)
+            from .service import trade_art
+            mon = Pokemon(incoming)
+            preview = dict(received=mon.summary, received_art=trade_art(mon))
             if remote.get("phase") == "offer":
-                return {"state": "running", "message": "Switch offer validated and accepted automatically."}
-        if remote.get("phase") == "saved":
+                return dict(state="running", message="Switch offer validated and accepted automatically.",
+                            **preview)
+        if remote.get("phase") in ("committed", "saved"):
             incoming = decode(remote["receipt"])
             if not proposal or incoming != decode(proposal["pokemon"]):
                 raise ValueError("Receipt differs from the approved Switch offer. Inspect both consoles.")
             atomic_write(directory / "received.pk3", incoming)
-            return {"state": "received", "message": "Switch exchange completed. Preparing verified save."}
-        return {"state": "running", "message": remote.get("message") or "Waiting for the Switch player."}
+            from .service import trade_art
+            mon = Pokemon(incoming)
+            return dict(state="received", message="Switch confirmed the trade. Preparing verified save.",
+                        received=mon.summary, received_art=trade_art(mon))
+        return dict(state="running", message=remote.get("message") or "Waiting for the Switch player.",
+                    **preview)
 
     def approve(self, revision):
         local, remote = self.peer.values()
@@ -265,16 +274,18 @@ class SwitchWorker:
             if local.get("launched") and local.get("phase") not in ("saved", "receipt", "cancelled"):
                 self._finish("Returned to an interrupted room. Inspect the Switch.")
 
-    def _finish(self, message):
+    def _publish_receipt(self, phase, message):
         local, _ = self.peer.values()
+        receipt = (self.directory / "received.pk3").read_bytes()
+        Pokemon(receipt)
+        proposal = local.get("proposal")
+        if not proposal or receipt != decode(proposal["pokemon"]):
+            raise ValueError("Receipt differs from approved offer")
+        self.peer.update(phase=phase, receipt=encode(receipt), message=message)
+
+    def _finish(self, message):
         try:
-            receipt = (self.directory / "received.pk3").read_bytes()
-            Pokemon(receipt)
-            proposal = local.get("proposal")
-            if not proposal or receipt != decode(proposal["pokemon"]):
-                raise ValueError("Receipt differs from approved offer")
-            self.peer.update(phase="saved", receipt=encode(receipt),
-                             message="Switch exchange completed with a verified receipt.")
+            self._publish_receipt("saved", "Switch trade confirmed and link cleanup completed.")
         except (OSError, ValueError):
             self.peer.update(phase="uncertain", message=message)
 
@@ -332,6 +343,10 @@ class SwitchWorker:
             return
         if remote.get("offer") != local.get("source_offer"):
             raise ValueError("Source offer changed after launching the radio session")
+        receipt_path = self.directory / "received.pk3"
+        if local.get("commit_possible") and local.get("phase") == "committing" and receipt_path.exists():
+            self._publish_receipt("committed", "Switch confirmed the trade; finishing link cleanup.")
+            local, remote = self.peer.values()
         if remote.get("applied"):
             return
         proposal_path = self.directory / "gate-offer.json"

@@ -72,8 +72,8 @@ Use the Python interpreter with the required upstream dependencies, or pass `--p
 1. Run the rebuilt 3DS app from this branch. Select the source save and Pokemon as usual, then start the exchange.
 2. The bridges recognize the one pinned peer in each room and establish their encrypted channel automatically.
 3. The Switch player leads the normal Direct Corner trade, accepts `3DSLINK`, sits on the left and selects a Pokemon.
-4. The source bridge validates the selected Switch Pokemon against the source save. Both bridges automatically accept the current validated offer revision.
-5. When the Switch-side process finishes with the matching receipt, the bridges automatically release and apply the replacement 3DS save.
+4. The source bridge validates the selected Switch Pokemon against the source save. The 3DS shows its species, nickname and sprite while both bridges automatically accept the current validated offer revision.
+5. When the Switch confirms the trade protocol and durably writes the matching receipt, the bridges automatically release and apply the replacement 3DS save. Link-room cleanup may continue afterward; the player does not need to leave the room to prove that the Pokemon was traded.
 
 X on the 3DS requests cancellation or recovery. Before commitment, the Switch engine declines the proposed exchange. After commitment may have started, the exchange remains pending for recovery; cancellation does not roll back a console save. B returns home without cancelling.
 

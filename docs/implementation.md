@@ -37,7 +37,7 @@ In local mode, the wrapper does not change packet parsing, session discovery, th
 
 The optional [experimental remote mode](remote-trading.md) installs a gate before the upstream engine confirms its trade. A private room admits one pinned bridge identity per role. Once the source bridge validates the current Switch offer, both trusted bridges accept that revision automatically. The relay carries encrypted snapshots; each bridge retains recovery records. Remote mode must be selected explicitly and still requires hardware timing validation.
 
-A receipt can precede the console's final save, so the service waits for the Switch-side process to exit and verifies that its receipt matches the accepted offer. A matching receipt from the completed process releases the source result automatically.
+The pinned engine durably writes a receipt when `CONFIRM_FINISH_TRADE` commits the exchange. The bridge verifies that receipt against the accepted offer and releases the source result immediately; the Switch-side process may continue cancelling the trade menu and closing its link afterward. A receipt is never inferred from process exit alone.
 
 ## Transaction states
 

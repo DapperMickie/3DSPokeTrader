@@ -64,7 +64,10 @@ class ManualRemote(RemoteBackend):
 class Radio:
     def __init__(self):
         self.calls = 0
+        self.receipt = threading.Event()
         self.finished = threading.Event()
+        self.release = threading.Event()
+        self.hold_after_receipt = False
         self.stop_event = threading.Event()
 
     def preflight(self): pass
@@ -78,6 +81,9 @@ class Radio:
                 action = read_json(directory / "gate-decision.json")["action"]
                 if action == "approve":
                     atomic_write(directory / "received.pk3", pokemon(133))
+                    self.receipt.set()
+                    if self.hold_after_receipt:
+                        self.release.wait(3)
                 else:
                     write_json(directory / "gate-cancelled.json", {"cancelled": True})
                 self.finished.set()
@@ -158,6 +164,8 @@ class RemoteTests(unittest.TestCase):
         self.sync()
         revision = self.worker.peer.values()[0]["proposal"]["revision"]
         self.assertEqual(state["state"], "running")
+        self.assertEqual(state["received"], "EEVEE / PIKACHU")
+        self.assertEqual(state["received_art"], "133\t0")
         self.assertEqual(self.source.peer.values()[0]["approval"], revision)
         self.assertEqual(self.worker.peer.values()[0]["approval"], revision)
         return revision
@@ -175,6 +183,19 @@ class RemoteTests(unittest.TestCase):
         self.assertTrue(self.worker.peer.values()[1]["applied"])
         self.assertEqual(self.radio.calls, 1)
         self.assertNotIn("pokemon", json.dumps(self.relay.rooms))
+
+    def test_committed_receipt_is_released_before_switch_process_exits(self):
+        self.radio.hold_after_receipt = True
+        self.offer()
+        self.worker.advance()
+        self.assertTrue(self.radio.receipt.wait(3))
+        self.assertTrue(self.worker.radio.is_alive())
+        self.worker.advance()
+        self.sync()
+        self.assertEqual(self.service.state(self.trade)["state"], "ready")
+        self.assertTrue(self.worker.radio.is_alive())
+        self.radio.release.set()
+        self.worker.radio.join(3)
 
     def test_completed_room_is_reused_without_new_config_or_controls(self):
         self.offer()
