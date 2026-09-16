@@ -12,6 +12,16 @@ from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives import hashes, serialization
 
 
+PEER_ROLES = {
+    "source": "switch",
+    "switch": "source",
+    "switch-a": "switch-b",
+    "switch-b": "switch-a",
+    "source-a": "source-b",
+    "source-b": "source-a",
+}
+
+
 def encode(data):
     return base64.b64encode(data).decode("ascii")
 
@@ -28,12 +38,15 @@ def new_identity():
 
 class Channel:
     def __init__(self, private, peer, room, role):
+        if role not in PEER_ROLES:
+            raise ValueError("Invalid remote role")
         key = X25519PrivateKey.from_private_bytes(decode(private))
         self.public = encode(key.public_key().public_bytes(
             serialization.Encoding.Raw, serialization.PublicFormat.Raw))
+        first = role in ("source", "switch-a", "source-a")
         transcript = json.dumps(["PokeTrader/remote/1", room,
-            self.public if role == "source" else peer,
-            peer if role == "source" else self.public], separators=(",", ":")).encode()
+            self.public if first else peer,
+            peer if first else self.public], separators=(",", ":")).encode()
         self.context = hashlib.sha256(transcript).digest()
         self.key = HKDF(algorithm=hashes.SHA256(), length=32, salt=self.context,
                        info=b"PokeTrader snapshots").derive(key.exchange(
@@ -54,7 +67,7 @@ class Channel:
         if type(sequence) is not int or sequence < 1:
             raise ValueError("Invalid snapshot sequence")
         data = decode(envelope["payload"])
-        peer_role = "switch" if self.role == "source" else "source"
+        peer_role = PEER_ROLES[self.role]
         plain = AESGCM(self.key).decrypt(data[:12], data[12:],
             self.context + peer_role.encode() + str(sequence).encode())
         value = json.loads(plain)

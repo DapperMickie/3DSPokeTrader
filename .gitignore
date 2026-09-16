@@ -25,6 +25,7 @@ bridge.cfg
 3ds/*.3dsx
 3ds/*.smdh
 dist/
+prototype-switch-offer-swap-data*/
 
 # Intermediate offscreen captures
 docs/screenshots/*.ppm

@@ -1,6 +1,9 @@
 # Remote trading design interview
 
-The user confirmed shared understanding and authorized implementation on `codex/remote-trading-design`. See [setup and validation](remote-trading.md) for the experimental implementation. The manual browser and approval design below was superseded by [ADR 0003](adr/0003-trusted-room-automation.md).
+The initial design and implementation happened on `codex/remote-trading-design`.
+See [setup and validation](remote-trading.md) for the released experimental
+implementation. The manual browser and approval design below was superseded by
+[ADR 0003](adr/0003-trusted-room-automation.md).
 
 ## Agreed user controls
 
@@ -28,7 +31,8 @@ Internet trading remains experimental until physical consoles pass separate-netw
 
 ## Branch isolation
 
-Remote-trading design and subsequent implementation belong on a separate branch. The design branch is `codex/remote-trading-design`; main must not receive this work without a later merge decision.
+Remote-trading work was isolated on `codex/remote-trading-design` until the
+0.3.0 release decision.
 
 ## Remaining design closure
 

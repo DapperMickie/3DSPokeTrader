@@ -8,6 +8,8 @@ import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
+from .remote_crypto import PEER_ROLES
+
 ROOM = re.compile(r"^[0-9a-f]{32}$")
 MAX_BODY = 16384
 
@@ -74,7 +76,7 @@ class RelayHandler(BaseHTTPRequestHandler):
                 raise ValueError("Interrupted request")
             value = json.loads(data)
             room, role = value["room"], value["role"]
-            if not ROOM.fullmatch(room) or role not in ("source", "switch"):
+            if not ROOM.fullmatch(room) or role not in PEER_ROLES:
                 raise ValueError("Invalid room or role")
             public, lease = value["public"], value["lease"]
             if not isinstance(public, str) or len(public) != 44 or not ROOM.fullmatch(lease):
@@ -87,8 +89,12 @@ class RelayHandler(BaseHTTPRequestHandler):
                     if len(self.server.rooms) >= self.server.max_rooms:
                         self.reply(503, {"error": "Relay room limit reached"})
                         return
-                    self.server.rooms[room] = {"touched": now}
+                    self.server.rooms[room] = {"touched": now,
+                                               "roles": tuple(sorted((role, PEER_ROLES[role])))}
                 state = self.server.rooms[room]
+                if state["roles"] != tuple(sorted((role, PEER_ROLES[role]))):
+                    self.reply(409, {"error": "Room uses a different bridge pairing"})
+                    return
                 old = state.get(role)
                 if old and (old["lease"] != lease or old["public"] != public):
                     self.reply(409, {"error": "Room role already occupied"})
@@ -96,7 +102,7 @@ class RelayHandler(BaseHTTPRequestHandler):
                 state["touched"] = now
                 state[role] = {"lease": lease, "public": public,
                                "envelope": value.get("envelope")}
-                other = state.get("switch" if role == "source" else "source")
+                other = state.get(PEER_ROLES[role])
                 answer = ({"public": other["public"], "envelope": other["envelope"]}
                           if other else {})
             self.reply(200, answer)

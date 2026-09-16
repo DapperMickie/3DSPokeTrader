@@ -52,7 +52,9 @@ with zipfile.ZipFile(sd_zip,"w",zipfile.ZIP_DEFLATED) as archive:
         "Launch PokeTrader from Homebrew Launcher.\n\n"
         "Alternatively, install PokeTrader.cia with FBI to place it on the HOME Menu.\n\n"
         "A Linux bridge, dedicated compatible Wi-Fi adapter, and your own\n"
-        "Switch keys are required for live trading. See docs/how-to-run.md.\n"
+        "Switch keys are required for local 3DS-to-Switch trading.\n"
+        "Remote bridge modes and relay setup are documented under docs/.\n"
+        "See docs/how-to-run.md for the local setup.\n"
         "No physical console trade has been tested with this build.\n"
         "Use a disposable save copy for the first hardware test.\n")
 source_files = [ROOT/p for p in ("README.md","LICENSE","pyproject.toml","Dockerfile.build",

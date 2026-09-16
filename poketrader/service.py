@@ -97,8 +97,13 @@ class Service:
             atomic_write(directory / "original.sav", save.data)
             atomic_write(directory / "offered.pk3", offered.pk3)
             atomic_write(directory / "companion.pk3", companion.pk3)
+            remote_pair = (hasattr(self.backend, "peer")
+                           and self.backend.peer.config["role"] in ("source-a", "source-b"))
+            message = ("Ready to exchange this selection with the other 3DS."
+                       if remote_pair else
+                       "Ready. Offer a non-evolving Pokemon without mail or an Egg on Switch.")
             state = dict(id=trade_id, save_id=save_id, index=index, state="prepared",
-                         mode=self.backend.label, message="Ready. Offer a non-evolving Pokemon without mail or an Egg on Switch.",
+                         mode=self.backend.label, message=message,
                          offered=offered.summary, received="", trainer_id=save.trainer_id,
                          offered_art=trade_art(offered))
             if hasattr(self.backend, "peer"):
@@ -124,13 +129,16 @@ class Service:
                     raise Conflict("Restore the remote config for this exchange")
                 local, remote = self.backend.peer.values()
                 reserved = local.get("reserved_id")
-                if reserved not in (None, trade_id):
-                    if not (local.get("applied") and remote.get("phase") == "saved"
-                            and remote.get("trade_id") == reserved):
-                        raise Conflict("This room still has an unfinished exchange.")
-                    self.backend.peer.update(trade_id=None, offer=None, companion=None,
-                        trainer_id=None, validated=None, approval=None, rejection=None,
-                        cancel=False, applied=False)
+                if hasattr(self.backend, "reserve"):
+                    self.backend.reserve(trade_id)
+                else:
+                    if reserved not in (None, trade_id):
+                        if not (local.get("applied") and remote.get("phase") == "saved"
+                                and remote.get("trade_id") == reserved):
+                            raise Conflict("This room still has an unfinished exchange.")
+                        self.backend.peer.update(trade_id=None, offer=None, companion=None,
+                            trainer_id=None, validated=None, approval=None, rejection=None,
+                            cancel=False, applied=False)
                 if evolution_target(Pokemon((self.directory(trade_id) / "offered.pk3").read_bytes())):
                     raise ValueError("Remote offers must not evolve by trade")
                 self.backend.peer.update(reserved_id=trade_id)

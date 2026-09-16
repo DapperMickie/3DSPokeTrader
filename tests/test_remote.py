@@ -22,7 +22,8 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 
 from poketrader.remote_crypto import Channel, new_identity, public_key, encode
 from poketrader.relay import Relay
-from poketrader.remote import Peer, RemoteBackend, SwitchWorker, configure
+from poketrader.remote import (Peer, RemoteBackend, SourcePairBackend, SwitchPairWorker,
+                               SwitchWorker, configure)
 from poketrader.__main__ import main
 from poketrader.service import Service, Conflict
 from poketrader.storage import write_json, read_json, atomic_write
@@ -44,6 +45,12 @@ class CryptoTests(unittest.TestCase):
         other_room = Channel(b, public_key(a), "other", "switch")
         with self.assertRaises(InvalidTag): other_room.open(message)
 
+    def test_switch_pair_context_has_symmetric_roles(self):
+        a, b = new_identity(), new_identity()
+        left = Channel(a, public_key(b), "room", "switch-a")
+        right = Channel(b, public_key(a), "room", "switch-b")
+        self.assertEqual(right.open(left.seal(1, {"phase": "offer"})), {"phase": "offer"})
+
     def test_relay_command_generates_credential_on_first_start(self):
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary)/"relay-credential"
@@ -59,6 +66,11 @@ class CryptoTests(unittest.TestCase):
 class ManualRemote(RemoteBackend):
     def _sync(self):
         pass  # Tests drive actual HTTPS exchanges deterministically.
+
+
+class ManualSourcePair(SourcePairBackend):
+    def _sync(self):
+        pass
 
 
 class Radio:
@@ -88,6 +100,33 @@ class Radio:
                     write_json(directory / "gate-cancelled.json", {"cancelled": True})
                 self.finished.set()
                 return 0
+
+
+class PairRadio:
+    def __init__(self, local_offer):
+        self.local_offer = local_offer
+        self.calls = []
+        self.stop_event = threading.Event()
+
+    def preflight(self): pass
+    def stop(self): self.stop_event.set()
+
+    def run(self, directory, _trainer_id):
+        self.calls.append(directory.name)
+        write_json(directory / "gate-offer.json",
+                   dict(revision=directory.name + "-offer", pokemon=encode(self.local_offer)))
+        deadline = time.monotonic() + 5
+        while time.monotonic() < deadline and not self.stop_event.wait(.01):
+            decision = directory / "gate-decision.json"
+            if not decision.exists():
+                continue
+            action = read_json(decision)["action"]
+            if action == "decline":
+                write_json(directory / "gate-cancelled.json", {"cancelled": True})
+            else:
+                atomic_write(directory / "received.pk3", self.local_offer)
+            return 0
+        return 1
 
 
 class RemoteTests(unittest.TestCase):
@@ -304,6 +343,11 @@ class RemoteTests(unittest.TestCase):
             self.relay.rooms[room]["switch"]["public"] = public_key(new_identity())
         with self.assertRaisesRegex(ValueError, "identity changed"):
             self.source.peer.exchange()
+        mixed_config = self.root/"mixed.json"
+        configure(mixed_config, self.url, "a"*32, "source-a", room)
+        with self.assertRaises(HTTPError) as mixed:
+            Peer(mixed_config, self.root/"mixed-peer").exchange()
+        self.assertEqual(mixed.exception.code, 409)
 
     def test_bridge_sends_an_explicit_user_agent(self):
         seen = {}
@@ -316,7 +360,7 @@ class RemoteTests(unittest.TestCase):
             return Response()
         with patch("poketrader.remote.urlopen", capture):
             self.source.peer.exchange()
-        self.assertEqual(seen["agent"], "PokeTrader-Bridge/0.2")
+        self.assertEqual(seen["agent"], "PokeTrader-Bridge/0.3")
 
     def test_room_change_persists_and_cannot_abandon_pinned_pairing(self):
         new_room = "d"*32
@@ -328,5 +372,68 @@ class RemoteTests(unittest.TestCase):
         self.assertEqual(self.worker.peer.config["room"], new_room)
         self.worker.peer.update(verified=True)
         with self.assertRaises(ValueError): self.worker.join("e"*32)
+
+    def test_two_switch_room_negotiates_then_executes_without_affecting_source_rooms(self):
+        config_a, config_b = self.root/"switch-a.json", self.root/"switch-b.json"
+        room = configure(config_a, self.url, "a"*32, "switch-a")
+        configure(config_b, self.url, "a"*32, "switch-b", room)
+        bootstrap = self.root/"bootstrap.sav"
+        bootstrap.write_bytes(save())
+        radio_a, radio_b = PairRadio(pokemon(25)), PairRadio(pokemon(133))
+        worker_a = SwitchPairWorker(config_a, self.root/"pair-a", radio_a, bootstrap)
+        worker_b = SwitchPairWorker(config_b, self.root/"pair-b", radio_b, bootstrap)
+        try:
+            deadline = time.monotonic() + 15
+            while time.monotonic() < deadline:
+                worker_a.peer.exchange(); worker_b.peer.exchange()
+                worker_a.advance(); worker_b.advance()
+                if (worker_a.peer.values()[0].get("phase") == "complete"
+                        and worker_b.peer.values()[0].get("phase") == "complete"):
+                    break
+                time.sleep(.02)
+            self.assertEqual(worker_a.peer.values()[0]["phase"], "complete")
+            self.assertEqual(worker_b.peer.values()[0]["phase"], "complete")
+            self.assertEqual(radio_a.calls, ["negotiation", "execution"])
+            self.assertEqual(radio_b.calls, ["negotiation", "execution"])
+            self.assertEqual((worker_a.execution/"offered.pk3").read_bytes(), pokemon(133))
+            self.assertEqual((worker_b.execution/"offered.pk3").read_bytes(), pokemon(25))
+            self.assertEqual(self.source.peer.config["role"], "source")
+            self.assertEqual(self.worker.peer.config["role"], "switch")
+        finally:
+            worker_a.close(); worker_b.close()
+
+    def test_two_3ds_room_exchanges_selected_records_without_switch_workers(self):
+        config_a, config_b = self.root/"source-a.json", self.root/"source-b.json"
+        room = configure(config_a, self.url, "a"*32, "source-a")
+        configure(config_b, self.url, "a"*32, "source-b", room)
+        backend_a = ManualSourcePair(config_a, self.root/"source-a-peer")
+        backend_b = ManualSourcePair(config_b, self.root/"source-b-peer")
+        service_a = Service(self.root/"source-a-saves", backend_a)
+        service_b = Service(self.root/"source-b-saves", backend_b)
+        trade_a, trade_b = "1"*32, "2"*32
+        save_a, _ = service_a.upload(save(offered=pokemon(25)))
+        save_b, _ = service_b.upload(save(offered=pokemon(133)))
+        service_a.prepare(trade_a, save_a, 0)
+        service_b.prepare(trade_b, save_b, 0)
+        try:
+            backend_a.peer.exchange(); backend_b.peer.exchange(); backend_a.peer.exchange()
+            service_a.start(trade_a); service_b.start(trade_b)
+            deadline = time.monotonic() + 8
+            states = ({}, {})
+            while time.monotonic() < deadline:
+                states = service_a.state(trade_a), service_b.state(trade_b)
+                backend_a.peer.exchange(); backend_b.peer.exchange(); backend_a.peer.exchange()
+                if states[0].get("state") == states[1].get("state") == "ready":
+                    break
+            self.assertEqual(states[0]["state"], "ready")
+            self.assertEqual(states[1]["state"], "ready")
+            self.assertEqual(Save(service_a.result(trade_a)).pokemon(0).species, 133)
+            self.assertEqual(Save(service_b.result(trade_b)).pokemon(0).species, 25)
+            service_a.applied(trade_a); service_b.applied(trade_b)
+            backend_a.peer.exchange(); backend_b.peer.exchange(); backend_a.peer.exchange()
+            self.assertTrue(backend_a.peer.values()[1]["applied"])
+            self.assertTrue(backend_b.peer.values()[1]["applied"])
+        finally:
+            service_a.close(); service_b.close()
 
 if __name__ == "__main__": unittest.main()

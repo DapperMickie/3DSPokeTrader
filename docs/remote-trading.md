@@ -1,29 +1,25 @@
 # Experimental remote 3DS and Switch trading
 
-Local trading is unchanged and remains the default. Remote trading is an optional mode for two cooperative friends using separate bridges and a relay they host themselves. Switch to Switch is not implemented.
+Local trading is unchanged and remains the default. Remote trading is an optional mode for two cooperative friends using separate bridges and a relay they host themselves. Version 0.3.0 includes an unvalidated two-session Switch-to-Switch mode.
 
 This implementation has software tests but has not passed physical-console remote trade validation. Use disposable save copies for hardware testing. Both bridge commands require an explicit experimental opt-in. An internet disconnect never automatically repeats a radio trade.
 
-## Host a relay
+Rooms keep their console pairing type. The existing `source` plus `switch`
+roles mean one 3DS save bridge and one physical Switch bridge. The experimental
+`switch-a` plus `switch-b` roles mean two physical Switch bridges. The relay
+rejects mixing those role pairs in one room. The `source-a` plus `source-b`
+roles connect two 3DS save bridges directly and do not start a Switch radio
+process.
 
-Use a server with a public DNS name and reachable TCP ports 80 and 443. Install Docker Engine and Compose. From the repository root:
+## Relay prerequisite
 
-```sh
-mkdir -p deploy/relay/secrets
-python3 -c 'import secrets; from pathlib import Path; Path("deploy/relay/secrets/relay-credential").write_text(secrets.token_hex(32))'
-printf 'RELAY_HOST=relay.example.com\n' > deploy/relay/.env
-docker compose -f deploy/relay/compose.yml --env-file deploy/relay/.env up -d --build
-```
-
-Replace `relay.example.com` with your DNS name and point its DNS record at the server. Caddy terminates HTTPS. The relay port is internal to the Compose network; do not expose either bridge's local HTTP interface to the internet. Share the relay credential privately with your friend, separately from room codes. The Docker secret file must be readable inside the unprivileged relay container.
-
-The relay forwards encrypted snapshots and stores no durable trade records. It limits room count, message size and concurrent requests. Idle relay entries expire after ten minutes; bridge recovery records do not expire. Restarting the relay is safe because bridges resend their current snapshots. The operator can see connection metadata and room identifiers, but not the encrypted Pokemon and trainer payloads.
-
-For an existing HTTPS reverse proxy, run `poke-trader relay --credential-file relay-credential` on loopback port 8780 and proxy `/v1/exchange` to it. Relay redirects are rejected by clients. The bridges verify the relay's TLS certificate using the operating system trust store.
-
-The Portainer deployment in `deploy/relay/portainer-compose.yml` builds from this repository and joins the existing `robsengamingproxy` network as `pokerelay:8780`. It generates a 64-character relay credential in its persistent `relay_data` volume on first startup. Read that credential once from the container, store it on both bridges, and keep it private. The process starts as root solely to initialize and write that Docker-managed volume; its root filesystem is read-only, all Linux capabilities are dropped, and privilege escalation is disabled.
+Every remote mode requires a relay under your control. Set it up first with
+[Host a PokeTrader relay](relay.md). The relay uses HTTPS, forwards encrypted
+snapshots, and keeps no durable trade records.
 
 ## Configure the bridges
+
+This 3DS-to-Switch mode requires a configured [PokeTrader relay](relay.md).
 
 Install the remote extra on both computers:
 
@@ -76,6 +72,75 @@ Use the Python interpreter with the required upstream dependencies, or pass `--p
 5. When the Switch confirms the trade protocol and durably writes the matching receipt, the bridges automatically release and apply the replacement 3DS save. Link-room cleanup may continue afterward; the player does not need to leave the room to prove that the Pokemon was traded.
 
 X on the 3DS requests cancellation or recovery. Before commitment, the Switch engine declines the proposed exchange. After commitment may have started, the exchange remains pending for recovery; cancellation does not roll back a console save. B returns home without cancelling.
+
+## Run a two-Switch trade
+
+This mode requires a configured [PokeTrader relay](relay.md).
+
+Each Switch needs its own Linux bridge, compatible Wi-Fi adapter, keys, and a
+local FireRed or LeafGreen save used only to supply a temporary simulator
+Pokemon during negotiation. The bridge reads that bootstrap save but never
+edits it.
+
+Create the room on the first bridge with role `switch-a`, then join its room
+code from the second bridge with role `switch-b`:
+
+```sh
+poke-trader remote-config --relay https://relay.example.com \
+  --credential-file relay-credential --role switch-a --output switch-a.remote.json
+
+poke-trader remote-config --relay https://relay.example.com \
+  --credential-file relay-credential --role switch-b --room ROOM_CODE \
+  --output switch-b.remote.json
+```
+
+Run `remote-switch` on both computers with that computer's config and bootstrap
+save:
+
+```sh
+poke-trader remote-switch --remote switch-a.remote.json \
+  --data remote-switch-a-data --upstream /path/to/frlg-ldn-trade \
+  --keys ~/.switch/prod.keys --phy phy1 --bootstrap-save /path/to/bootstrap.sav \
+  --experimental-remote
+```
+
+The players enter Direct Corner twice. On the first visit, each selects the
+Pokemon they want to trade. The bridges capture both exact records and decline
+before commitment. After both first sessions close, each bridge starts a second
+session containing the other player's selected Pokemon. Each player re-enters
+Direct Corner and selects the same local Pokemon. Matching selections commit
+automatically; a changed selection is declined. There is no browser or terminal
+confirmation.
+
+## Run a two-3DS trade
+
+This mode requires a configured [PokeTrader relay](relay.md).
+
+Create a `source-a` config on one bridge and join its room with `source-b` on
+the other:
+
+```sh
+poke-trader remote-config --relay https://relay.example.com \
+  --credential-file relay-credential --role source-a --output source-a.remote.json
+
+poke-trader remote-config --relay https://relay.example.com \
+  --credential-file relay-credential --role source-b --room ROOM_CODE \
+  --output source-b.remote.json
+```
+
+Run the ordinary 3DS bridge server on both computers:
+
+```sh
+poke-trader serve --config bridge.cfg --data remote-source-a-data \
+  --remote source-a.remote.json --experimental-remote
+```
+
+Each player uses the existing 3DS app to choose a save and boxed Pokemon. Once
+both selections arrive, each bridge validates the other record against its
+local save. Matching proposals release both replacement saves automatically.
+This is a single-session exchange because both selected records are known
+before either save is replaced. No Switch, Switch keys, dedicated radio, web
+interface, or terminal confirmation is involved.
 
 ## Recover an interruption
 

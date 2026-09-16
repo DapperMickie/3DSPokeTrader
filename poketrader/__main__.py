@@ -63,7 +63,8 @@ def main(argv=None):
     remote = sub.add_parser("remote-config", help="Create a private room config for one exchange")
     remote.add_argument("--relay", required=True)
     remote.add_argument("--credential-file", type=Path, required=True)
-    remote.add_argument("--role", choices=("source", "switch"), required=True)
+    remote.add_argument("--role", choices=("source", "switch", "switch-a", "switch-b",
+                                           "source-a", "source-b"), required=True)
     remote.add_argument("--room", help="Room code from the source player; Switch users can also join from the browser")
     remote.add_argument("--output", type=Path, required=True)
     switch = sub.add_parser("remote-switch", help="Automated trusted-room Switch bridge")
@@ -73,6 +74,8 @@ def main(argv=None):
     switch.add_argument("--keys", type=Path, default=Path("~/.switch/prod.keys"))
     switch.add_argument("--phy", default="phy1")
     switch.add_argument("--python", default=sys.executable)
+    switch.add_argument("--bootstrap-save", type=Path,
+                        help="FRLG save supplying two temporary party Pokemon for a Switch-to-Switch room")
     # Retained as ignored compatibility options for existing launch scripts.
     switch.add_argument("--bind", default="127.0.0.1", help=argparse.SUPPRESS)
     switch.add_argument("--port", type=int, default=8766, help=argparse.SUPPRESS)
@@ -117,12 +120,19 @@ def main(argv=None):
                 peer.update(phase="cancelled", approval=None, message="Operator checked both consoles: no trade occurred.")
                 print("Recorded no trade. Restart the Switch bridge to notify the source bridge; use a new room for another exchange.")
         elif args.command == "remote-switch":
-            from .remote import SwitchWorker
+            from .remote import SwitchPairWorker, SwitchWorker
             with exclusive(args.data):
                 backend = LiveBackend(args.upstream, args.keys, args.phy, args.python)
                 backend.preflight()
-                worker = SwitchWorker(args.remote, args.data, backend)
-                print(f"Trusted room {worker.peer.config['room']}: waiting for the 3DS bridge. No web controls are required.", flush=True)
+                role = read_json(args.remote)["role"]
+                if role in ("switch-a", "switch-b"):
+                    if not args.bootstrap_save:
+                        raise ValueError("Switch-to-Switch rooms require --bootstrap-save")
+                    worker = SwitchPairWorker(args.remote, args.data, backend, args.bootstrap_save)
+                    print(f"Switch-to-Switch room {worker.peer.config['room']}: waiting for the other bridge.", flush=True)
+                else:
+                    worker = SwitchWorker(args.remote, args.data, backend)
+                    print(f"Trusted room {worker.peer.config['room']}: waiting for the 3DS bridge. No web controls are required.", flush=True)
                 try:
                     worker.run()
                 finally:
@@ -150,8 +160,10 @@ def main(argv=None):
                 if args.remote:
                     if not args.experimental_remote:
                         raise ValueError("Remote hardware validation is incomplete; use --experimental-remote to opt in")
-                    from .remote import RemoteBackend
-                    backend = RemoteBackend(args.remote, args.data / "remote")
+                    from .remote import RemoteBackend, SourcePairBackend
+                    role = read_json(args.remote)["role"]
+                    backend_type = SourcePairBackend if role in ("source-a", "source-b") else RemoteBackend
+                    backend = backend_type(args.remote, args.data / "remote")
                 else:
                     backend = (DemoBackend(args.demo_receive.read_bytes()) if args.demo_receive else
                                LiveBackend(args.upstream, args.keys, args.phy, args.python))

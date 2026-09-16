@@ -1,6 +1,10 @@
-# How to run PokeTrader
+# Run the local 3DS-to-Switch bridge
 
 PokeTrader has two parts: the app on your 3DS and the bridge on a Linux PC. The 3DS and PC communicate over your local network. The PC uses a separate compatible Wi-Fi adapter to communicate with the Switch.
+
+This guide covers the local mode, which does not use a relay. For 3DS-to-Switch,
+Switch-to-Switch, or 3DS-to-3DS trades across separate bridges, see the
+[remote mode guide](remote-trading.md) and [relay setup](relay.md).
 
 ## What you need
 
