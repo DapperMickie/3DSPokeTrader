@@ -33,8 +33,8 @@ a self-hosted relay. Room roles keep all three pairings separate.
 ## Host a relay
 
 Remote rooms need an HTTPS relay under your control. It forwards encrypted
-snapshots and stores no durable trade history. Docker Compose, an existing
-reverse proxy, and Portainer setups are documented in
+snapshots and stores no durable trade history. Docker Compose and existing
+reverse-proxy setups are documented in
 [Host a PokeTrader relay](docs/relay.md). Local 3DS-to-Switch trading never uses
 the relay.
 

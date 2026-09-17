@@ -41,17 +41,6 @@ Proxy `/v1/exchange` from the public HTTPS hostname to `127.0.0.1:8780`. Relay
 redirects are rejected, and bridges validate the server certificate with their
 operating-system trust store.
 
-## Portainer
-
-`deploy/relay/portainer-compose.yml` builds the repository and joins the
-existing `robsengamingproxy` network as `pokerelay:8780`. It creates a
-64-character credential in the persistent `relay_data` volume on first start.
-Read it once from the container and store it on the participating bridges.
-
-The container starts as root only to initialize the Docker-managed volume. Its
-root filesystem is read-only, Linux capabilities are dropped, and privilege
-escalation is disabled.
-
 ## Operation and recovery
 
 The relay limits rooms, message size, and concurrent requests. Idle in-memory
